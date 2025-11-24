@@ -17,13 +17,6 @@
 
 
   networking.hostName = "nixos"; # Define your hostname.
-  # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
-
-  # Configure network proxy if necessary
-  # networking.proxy.default = "http://user:password@proxy:port/";
-  # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
-
-  # Enable networking
   networking.networkmanager.enable = true;
 
   # Set your time zone.
@@ -49,33 +42,29 @@
     layout = "gb";
     variant = "";
   };
+  console.keyMap = "uk";
 
   services.displayManager.cosmic-greeter.enable = true;
   services.desktopManager.cosmic.enable = true;
 
-  # Configure console keymap
-  console.keyMap = "uk";
-
-  # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.js = {
     isNormalUser = true;
     description = "js";
     extraGroups = [ "networkmanager" "wheel" ];
-    packages = with pkgs; [];
   };
 
+  services.netbird.enable = true;
+  services.fwupd.enable = true;
+  
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
-  vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
-  firefox
+  vim 
+  wget
+  git
+  netcat-gnu
   pkgs.netbird-ui
-  #  wget
-netcat-gnu
-htop
   ];
-services.netbird.enable = true;
-services.fwupd.enable = true;
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
   # programs.mtr.enable = true;

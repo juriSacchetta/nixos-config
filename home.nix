@@ -1,19 +1,34 @@
 { config, pkgs, ... }:
 
 {
-  # Info utente
   home.username = "js";
   home.homeDirectory = "/home/js";
 
-  # Pacchetti utente (non richiedono sudo!)
   home.packages = with pkgs; [
-    htop
+    neovim
+    firefox
     ripgrep
     neofetch
     git
+  
+  # Dipendenze per LazyVim / Telescope / Treesitter
+  ripgrep
+  fd
+  git
+  wget
+  curl
+
+  # Compilatori per Treesitter e LSP
+  gcc
+  gnumake
+  unzip
+  nodejs_22 # Per molti LSP
+  python3
+
+  # Clipboard support (se usi Wayland/Cosmic)
+  wl-clipboard
   ];
 
-  # Esempio configurazione git
   programs.git = {
     enable = true;
     userName = "Juri Sacchetta";
