@@ -2,7 +2,7 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ config, pkgs, ... }:
+{ config, pkgs, inputs, ... }:
 
 {
   imports =
@@ -10,11 +10,28 @@
       ./hardware-configuration.nix
     ];
 
+  nix.settings.experimental-features = [ "nix-command" "flakes" ]; # <--- 2. FONDAMENTALE
+  
+  # Ottimizzazione: fa sì che 'nix shell' usi il pacchetto nixpkgs già scaricato nel sistema
+  nix.registry.nixpkgs.flake = inputs.nixpkgs; 
+
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
-  boot.kernelParams = [ "amdgpu.dcdebugmask=0x10" ];
+  boot.kernelPackages = pkgs.linuxPackages_latest;
+  boot.kernelParams = [ "amdgpu.dcdebugmask=0x10" "amd_pstate=active"];
 
+  hardware.cpu.amd.updateMicrocode = true;
+  hardware.enableAllFirmware = true;
+  hardware.graphics = {
+    enable = true;
+    enable32Bit = true; # Per compatibilità Steam/Wine
+    
+    # Librerie extra per l'accelerazione video (VA-API)
+    extraPackages = with pkgs; [
+      libvdpau-va-gl
+    ];
+  };
 
   networking.hostName = "nixos"; # Define your hostname.
   networking.networkmanager.enable = true;
@@ -42,6 +59,8 @@
     layout = "gb";
     variant = "";
   };
+  services.fstrim.enable = true;
+  services.power-profiles-daemon.enable = true;
   console.keyMap = "uk";
 
   nixpkgs.config.allowUnfree = true;
@@ -63,6 +82,7 @@
   environment.systemPackages = with pkgs; [
   vim 
   wget
+  htop
   git
   netcat-gnu
   pkgs.netbird-ui
