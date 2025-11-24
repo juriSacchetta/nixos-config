@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ inputs, config, pkgs, ... }:
 
 {
   home.username = "js";
@@ -27,6 +27,10 @@
 
   # Clipboard support (se usi Wayland/Cosmic)
   wl-clipboard
+
+
+  spotify
+inputs.zen-browser.packages."${pkgs.system}".default
   ];
 
   programs.git = {
