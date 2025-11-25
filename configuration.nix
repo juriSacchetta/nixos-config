@@ -72,6 +72,7 @@
   #services.xserver.displayManager.gdm.enable=true;
   #services.xserver.desktopManager.gnome.enable = true;
   programs.dconf.enable = true;
+programs.zsh.enable = true;
   services.dbus.enable = true;
   services.dbus.packages = [ pkgs.dconf ];
   security.polkit.enable = true;
@@ -79,6 +80,7 @@
     isNormalUser = true;
     description = "js";
     extraGroups = [ "networkmanager" "wheel" ];
+    shell = pkgs.zsh;
   };
 
   services.netbird.enable = true;
