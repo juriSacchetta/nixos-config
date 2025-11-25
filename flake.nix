@@ -3,22 +3,33 @@
 
   inputs = {
     # Nixpkgs: usiamo il ramo unstable per avere software recente (stile Arch)
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    # nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+
+    # Passiamo a stable ;)
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
+    nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
 
     # Home Manager: per gestire la /home
-    home-manager.url = "github:nix-community/home-manager";
+    home-manager.url = "github:nix-community/home-manager/release-25.05";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
     zen-browser.url = "github:0xc000022070/zen-browser-flake";
-    # Questo evita duplicati delle dipendenze
-    zen-browser.inputs.nixpkgs.follows = "nixpkgs";
+    zen-browser.inputs.nixpkgs.follows = "nixpkgs-unstable";
   };
 
-  outputs = { self, nixpkgs, home-manager, ... }@inputs: {
+  outputs = { self, nixpkgs, nixpkgs-unstable, home-manager, ... }@inputs: {
     nixosConfigurations = {
       nixos = nixpkgs.lib.nixosSystem {
-        specialArgs = { inherit inputs; };
-        modules = [
+	system = "x86_64-linux";
+	specialArgs = { 
+  	  inherit inputs; 
+  
+	  pkgs-unstable = import nixpkgs-unstable {
+	    system = "x86_64-linux";
+	    config.allowUnfree = true;
+	  };
+	};
+	modules = [
           ./configuration.nix
           ./hardware-configuration.nix
           
@@ -30,8 +41,14 @@
             
             home-manager.users.js = import ./home.nix;
 
-            # Passa gli input anche a home-manager
-            home-manager.extraSpecialArgs = { inherit inputs; };
+	    home-manager.extraSpecialArgs = { 
+              inherit inputs;
+              # Passiamo anche qui l'istanza unstable importata sopra
+              pkgs-unstable = import nixpkgs-unstable {
+                system = "x86_64-linux";
+                config.allowUnfree = true;
+              };
+            };
           }
         ];
       };
