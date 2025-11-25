@@ -30,16 +30,25 @@
 
   spotify
 inputs.zen-browser.packages."${pkgs.system}".default
+tmux
   ];
 
   programs.git = {
     enable = true;
     userName = "Juri Sacchetta";
     userEmail = "jurisacchetta@gmail.com";
-  };
+    extraConfig = {
+      credential.helper = "store";
+      init.defaultBranch = "main";
+    };
+};
 
   # Questa versione non toccarla, serve per compatibilità futura
   home.stateVersion = "25.05";
   programs.home-manager.enable = true;
 services.network-manager-applet.enable = true;
+services.nextcloud-client = {
+    enable = true;
+    startInBackground = true;
+  };
 }
