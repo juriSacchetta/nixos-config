@@ -71,7 +71,10 @@
   #services.xserver.enable=true;
   #services.xserver.displayManager.gdm.enable=true;
   #services.xserver.desktopManager.gnome.enable = true;
-
+  programs.dconf.enable = true;
+  services.dbus.enable = true;
+  services.dbus.packages = [ pkgs.dconf ];
+  security.polkit.enable = true;
   users.users.js = {
     isNormalUser = true;
     description = "js";
@@ -92,6 +95,9 @@
   pkgs.netbird-ui
 seahorse
 networkmanagerapplet
+    xdg-utils
+    xdg-desktop-portal 
+    xdg-desktop-portal-cosmic 
   ];
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
