@@ -65,11 +65,11 @@
 
   nixpkgs.config.allowUnfree = true;
 
-  #services.displayManager.cosmic-greeter.enable = true;
-  #services.desktopManager.cosmic.enable = true;
-  services.xserver.enable=true;
-  services.xserver.displayManager.gdm.enable=true;
-  services.xserver.desktopManager.gnome.enable = true;
+  services.displayManager.cosmic-greeter.enable = true;
+  services.desktopManager.cosmic.enable = true;
+  #services.xserver.enable=true;
+  #services.xserver.displayManager.gdm.enable=true;
+  #services.xserver.desktopManager.gnome.enable = true;
 
   users.users.js = {
     isNormalUser = true;
