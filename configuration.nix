@@ -10,7 +10,7 @@
       ./hardware-configuration.nix
     ];
 
-  nix.settings.experimental-features = [ "nix-command" "flakes" ]; # <--- 2. FONDAMENTALE
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];
   
   # Ottimizzazione: fa sì che 'nix shell' usi il pacchetto nixpkgs già scaricato nel sistema
   nix.registry.nixpkgs.flake = inputs.nixpkgs; 
@@ -56,8 +56,8 @@
 
   # Configure keymap in X11
   services.xserver.xkb = {
-    layout = "gb";
-    variant = "";
+    layout = "us";
+    variant = "altgr-intl"; 
   };
   services.fstrim.enable = true;
   services.power-profiles-daemon.enable = true;
@@ -65,8 +65,11 @@
 
   nixpkgs.config.allowUnfree = true;
 
-  services.displayManager.cosmic-greeter.enable = true;
-  services.desktopManager.cosmic.enable = true;
+  #services.displayManager.cosmic-greeter.enable = true;
+  #services.desktopManager.cosmic.enable = true;
+  services.xserver.enable=true;
+  services.xserver.displayManager.gdm.enable=true;
+  services.xserver.desktopManager.gnome.enable = true;
 
   users.users.js = {
     isNormalUser = true;

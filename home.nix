@@ -11,7 +11,6 @@
     neofetch
     git
   
-  # Dipendenze per LazyVim / Telescope / Treesitter
   ripgrep
   fd
   git
