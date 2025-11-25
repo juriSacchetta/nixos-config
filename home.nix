@@ -41,4 +41,5 @@ inputs.zen-browser.packages."${pkgs.system}".default
   # Questa versione non toccarla, serve per compatibilità futura
   home.stateVersion = "25.05";
   programs.home-manager.enable = true;
+services.network-manager-applet.enable = true;
 }

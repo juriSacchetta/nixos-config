@@ -61,8 +61,9 @@
   };
   services.fstrim.enable = true;
   services.power-profiles-daemon.enable = true;
-  console.keyMap = "uk";
+  services.gnome.gnome-keyring.enable = true;
 
+  console.useXkbConfig = true;
   nixpkgs.config.allowUnfree = true;
 
   services.displayManager.cosmic-greeter.enable = true;
@@ -89,6 +90,8 @@
   git
   netcat-gnu
   pkgs.netbird-ui
+seahorse
+networkmanagerapplet
   ];
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
