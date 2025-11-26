@@ -10,28 +10,32 @@
       ./hardware-configuration.nix
     ];
 
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
-  
-  # Ottimizzazione: fa sì che 'nix shell' usi il pacchetto nixpkgs già scaricato nel sistema
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];  
   nix.registry.nixpkgs.flake = inputs.nixpkgs; 
 
-  # Bootloader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
   boot.kernelPackages = pkgs.linuxPackages_latest;
-  boot.kernelParams = [ "amdgpu.dcdebugmask=0x10" "amd_pstate=active"];
+  boot.kernelParams = ["amd_pstate=active"];
 
-  hardware.cpu.amd.updateMicrocode = true;
-  hardware.enableAllFirmware = true;
-  hardware.graphics = {
-    enable = true;
-    enable32Bit = true; # Per compatibilità Steam/Wine
+  hardware = {
+  	enableAllFirmware = true;
+  	cpu.amd.updateMicrocode = true;
+	graphics = {
+    		enable = true;
+    		enable32Bit = true; # Per compatibilità Steam/Wine
     
-    # Librerie extra per l'accelerazione video (VA-API)
-    extraPackages = with pkgs; [
-      libvdpau-va-gl
-    ];
-  };
+		    extraPackages = with pkgs; [
+		      amdvlk # Vulkan driver for AMD
+		      mesa
+		      libvdpau-va-gl
+		    ];
+	};
+	#vulkan = {
+	#	enable = true;
+	#	package = pkgs.vulkan-loader;
+	#}; 
+ };
 
   networking.hostName = "nixos"; # Define your hostname.
   networking.networkmanager.enable = true;
@@ -100,6 +104,7 @@ networkmanagerapplet
     xdg-utils
     xdg-desktop-portal 
     xdg-desktop-portal-cosmic 
+vulkan-loader
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
