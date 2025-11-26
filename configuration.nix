@@ -2,7 +2,7 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ config, pkgs, inputs, ... }:
+{ config, pkgs, pkgs-unstable, inputs, ... }:
 
 {
   imports =
@@ -72,7 +72,7 @@
   #services.xserver.displayManager.gdm.enable=true;
   #services.xserver.desktopManager.gnome.enable = true;
   programs.dconf.enable = true;
-programs.zsh.enable = true;
+  programs.zsh.enable = true;
   services.dbus.enable = true;
   services.dbus.packages = [ pkgs.dconf ];
   security.polkit.enable = true;
@@ -84,6 +84,7 @@ programs.zsh.enable = true;
   };
 
   services.netbird.enable = true;
+  services.netbird.package = pkgs-unstable.netbird;
   services.fwupd.enable = true;
   
   # List packages installed in system profile. To search, run:
@@ -94,13 +95,13 @@ programs.zsh.enable = true;
   htop
   git
   netcat-gnu
-  pkgs.netbird-ui
 seahorse
 networkmanagerapplet
     xdg-utils
     xdg-desktop-portal 
     xdg-desktop-portal-cosmic 
   ];
+
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
   # programs.mtr.enable = true;
