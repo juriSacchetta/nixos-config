@@ -20,7 +20,6 @@
       # Tool per la Shell (Aggiunti dal tuo .zshrc)
       eza # Per gli alias ls, ll, lt
       bat # Per le funzioni di preview
-      zoxide # Per la navigazione intelligente
 
       # Dev
       gcc
@@ -33,8 +32,6 @@
       neofetch
       spotify
       inputs.zen-browser.packages."${pkgs.system}".default
-
-      fzf # Per la shell (fzf è gestito anche come programma)
 
       # --- FONT ---
       # Font di base per una buona copertura Unicode/Emoji
@@ -65,6 +62,7 @@
       userName = "Juri Sacchetta";
       userEmail = "jurisacchetta@gmail.com";
       extraConfig = {
+        core.editor = "nvim";
         credential.helper = "store";
         init.defaultBranch = "main";
       };
@@ -95,7 +93,6 @@
         # Qui puoi incollare le funzioni sgpt, fzf, ecc. dal vecchio zshrc
 
         # Esempio zoxide init
-        eval "$(zoxide init zsh)"
       '';
       oh-my-zsh = {
         enable = true;
@@ -111,6 +108,11 @@
       # Dipendenze extra per far funzionare Treesitter e Mason (se proprio insisti)
       # withNodeJs = true; # Già incluso in molti casi, ma male non fa
       # withPython3 = true;
+    };
+    fzf.enable = true;
+    zoxide = {
+      enable = true;
+      enableZshIntegration = true;
     };
   };
   # --- 3. SERVIZI ---

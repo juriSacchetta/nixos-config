@@ -20,45 +20,41 @@
   outputs = { self, nixpkgs, nixpkgs-unstable, home-manager, ... }@inputs: {
     nixosConfigurations = {
       nixos = nixpkgs.lib.nixosSystem {
-	system = "x86_64-linux";
-	specialArgs = { 
-  	  inherit inputs; 
-  
-	  pkgs-unstable = import nixpkgs-unstable {
-	    system = "x86_64-linux";
-	    config.allowUnfree = true;
-	  };
-	};
-	modules = [
+        system = "x86_64-linux";
+        specialArgs = {
+          inherit inputs;
+
+          pkgs-unstable = import nixpkgs-unstable {
+            system = "x86_64-linux";
+            config.allowUnfree = true;
+          };
+        };
+        modules = [
           ./configuration.nix
           ./hardware-configuration.nix
-          
+
           # Modulo Home Manager
           home-manager.nixosModules.home-manager
           {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
-            
+
             home-manager.users.js = import ./home.nix;
 
-	    home-manager.extraSpecialArgs = { 
+            home-manager.extraSpecialArgs = {
               inherit inputs;
-              # Passiamo anche qui l'istanza unstable importata sopra
-              pkgs-unstable = import nixpkgs-unstable {
-                system = "x86_64-linux";
-                config.allowUnfree = true;
-              };
+              inherit (nixpkgs-unstable) pkgs-unstable;
             };
           }
         ];
       };
     };
-# NUOVA SEZIONE: Ambienti di sviluppo (Shells)
+    # NUOVA SEZIONE: Ambienti di sviluppo (Shells)
     devShells.x86_64-linux = let
       # Definisce il set di pacchetti 'pkgs' per l'architettura x86_64-linux
       pkgs = import nixpkgs { system = "x86_64-linux"; };
     in {
-      
+
       # 1. Definiamo la nostra shell "dev-tools" usando mkShell (la funzione standard)
       dev-tools = pkgs.mkShell {
         name = "dev-tools";

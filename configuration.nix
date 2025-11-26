@@ -5,37 +5,34 @@
 { config, pkgs, pkgs-unstable, inputs, ... }:
 
 {
-  imports =
-    [ # Include the results of the hardware scan.
-      ./hardware-configuration.nix
-    ];
+  imports = [ ./hardware-configuration.nix ];
 
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];  
-  nix.registry.nixpkgs.flake = inputs.nixpkgs; 
-
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
-  boot.kernelPackages = pkgs.linuxPackages_latest;
-  boot.kernelParams = ["amd_pstate=active"];
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  nix.registry.nixpkgs.flake = inputs.nixpkgs;
+  boot = {
+    kernelPackages = pkgs.linuxPackages_latest;
+    kernelParams = [ "amd_pstate=active" ];
+    loader.systemd-boot.enable = true;
+    loader.efi.canTouchEfiVariables = true;
+  };
 
   hardware = {
-  	enableAllFirmware = true;
-  	cpu.amd.updateMicrocode = true;
-	graphics = {
-    		enable = true;
-    		enable32Bit = true; # Per compatibilità Steam/Wine
-    
-		    extraPackages = with pkgs; [
-		      amdvlk # Vulkan driver for AMD
-		      mesa
-		      libvdpau-va-gl
-		    ];
-	};
-	#vulkan = {
-	#	enable = true;
-	#	package = pkgs.vulkan-loader;
-	#}; 
- };
+    enableAllFirmware = true;
+    graphics = {
+      enable = true;
+      enable32Bit = true; # Per compatibilità Steam/Wine
+
+      extraPackages = with pkgs; [
+        amdvlk # Vulkan driver for AMD
+        mesa
+        libvdpau-va-gl
+      ];
+    };
+    #vulkan = {
+    #	enable = true;
+    #	package = pkgs.vulkan-loader;
+    #}; 
+  };
 
   networking.hostName = "nixos"; # Define your hostname.
   networking.networkmanager.enable = true;
@@ -58,28 +55,40 @@
     LC_TIME = "it_IT.UTF-8";
   };
 
-  # Configure keymap in X11
-  services.xserver.xkb = {
-    layout = "us";
-    variant = "altgr-intl"; 
-  };
-  services.fstrim.enable = true;
-  services.power-profiles-daemon.enable = true;
-  services.gnome.gnome-keyring.enable = true;
+  services = {
+    xserver = {
+      # enable = true;
+      # displayManager.gdm.enable = true;
+      # desktopManager.gnome.enable = true;
 
+      # Configure keymap in X11
+      xkb = {
+        layout = "us";
+        variant = "altgr-intl";
+      };
+    };
+    fstrim.enable = true;
+    power-profiles-daemon.enable = true;
+    gnome.gnome-keyring.enable = true;
+    displayManager.cosmic-greeter.enable = true;
+    desktopManager.cosmic.enable = true;
+    dbus = {
+      enable = true;
+      packages = [ pkgs.dconf ];
+    };
+    netbird = {
+      enable = true;
+      package = pkgs-unstable.netbird;
+    };
+    fwupd.enable = true;
+  };
+
+  programs.dconf.enable = true;
+  security.polkit.enable = true;
+  programs.zsh.enable = true;
   console.useXkbConfig = true;
   nixpkgs.config.allowUnfree = true;
 
-  services.displayManager.cosmic-greeter.enable = true;
-  services.desktopManager.cosmic.enable = true;
-  #services.xserver.enable=true;
-  #services.xserver.displayManager.gdm.enable=true;
-  #services.xserver.desktopManager.gnome.enable = true;
-  programs.dconf.enable = true;
-  programs.zsh.enable = true;
-  services.dbus.enable = true;
-  services.dbus.packages = [ pkgs.dconf ];
-  security.polkit.enable = true;
   users.users.js = {
     isNormalUser = true;
     description = "js";
@@ -87,24 +96,20 @@
     shell = pkgs.zsh;
   };
 
-  services.netbird.enable = true;
-  services.netbird.package = pkgs-unstable.netbird;
-  services.fwupd.enable = true;
-  
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
-  vim 
-  wget
-  htop
-  git
-  netcat-gnu
-seahorse
-networkmanagerapplet
+    vim
+    wget
+    htop
+    git
+    netcat-gnu
+    seahorse
+    networkmanagerapplet
     xdg-utils
-    xdg-desktop-portal 
-    xdg-desktop-portal-cosmic 
-vulkan-loader
+    xdg-desktop-portal
+    xdg-desktop-portal-cosmic
+    vulkan-loader
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
