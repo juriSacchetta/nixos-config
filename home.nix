@@ -1,70 +1,121 @@
 { inputs, config, pkgs, ... }:
 
 {
-  home.username = "js";
-  home.homeDirectory = "/home/js";
+  home = {
+    username = "js";
+    homeDirectory = "/home/js";
 
-  # --- 1. PACCHETTI UTENTE ---
-  home.packages = with pkgs; [
-    # Core
-    tmux
-    dnsutils
-    wget
-    curl
-    unzip
-    ripgrep
-    fd
-    wl-clipboard
+    # --- 1. PACCHETTI UTENTE ---
+    packages = with pkgs; [
+      # Core
+      tmux
+      dnsutils
+      wget
+      curl
+      unzip
+      ripgrep
+      fd
+      wl-clipboard
 
-    # Dev
-    gcc
-    gnumake
-    nodejs_22
-    python3
+      # Tool per la Shell (Aggiunti dal tuo .zshrc)
+      eza # Per gli alias ls, ll, lt
+      bat # Per le funzioni di preview
+      zoxide # Per la navigazione intelligente
 
-    # App
-    firefox
-    neofetch
-    spotify
-    inputs.zen-browser.packages."${pkgs.system}".default
-  ];
+      # Dev
+      gcc
+      gnumake
+      nodejs_22
+      python3
 
-  # --- 2. PROGRAMMI ---
-  
-  # Configurazione GIT
-  programs.git = {
-    enable = true;
-    userName = "Juri Sacchetta";
-    userEmail = "jurisacchetta@gmail.com";
-    extraConfig = {
-      credential.helper = "store";
-      init.defaultBranch = "main";
+      # App
+      firefox
+      neofetch
+      spotify
+      inputs.zen-browser.packages."${pkgs.system}".default
+
+      fzf # Per la shell (fzf è gestito anche come programma)
+
+      # --- FONT ---
+      # Font di base per una buona copertura Unicode/Emoji
+      noto-fonts
+      noto-fonts-cjk-sans
+      noto-fonts-emoji
+
+      # Icone per barre di stato e applicazioni
+      font-awesome
+
+      # Nerd Fonts (Cruciali per P10K e Neovim)
+      # Usa il namespace 'nerd-fonts' per installare solo quelli che ti servono
+      nerd-fonts.jetbrains-mono # Ottimo per il coding
+      nerd-fonts.fira-code # Altra ottima scelta con legature
+      nerd-fonts.meslo-lg # Raccomandato ufficialmente da Powerlevel10k
+      nerd-fonts.symbols-only # Se vuoi solo le icone
+
+      # Packages per LazyVim
+      statix
+      nil
+      nixfmt-classic
+    ];
+  };
+
+  programs = {
+    git = {
+      enable = true;
+      userName = "Juri Sacchetta";
+      userEmail = "jurisacchetta@gmail.com";
+      extraConfig = {
+        credential.helper = "store";
+        init.defaultBranch = "main";
+      };
+    };
+    zsh = {
+      enable = true;
+      enableCompletion = true;
+
+      # Plugin nativi (molto più veloci di Oh My Zsh)
+      autosuggestion.enable = true;
+      syntaxHighlighting.enable = true;
+
+      shellAliases = {
+        cls = "clear";
+        update = "sudo nixos-rebuild switch --flake ~/nixos-config";
+        ls = "eza --icons";
+        ll = "eza -al --icons";
+        lt = "eza -a --tree --level=1 --icons";
+        cd = "z";
+      };
+      history.size = 10000;
+      initContent = ''
+        source ${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme
+
+        [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+
+        # --- Le tue funzioni personalizzate ---
+        # Qui puoi incollare le funzioni sgpt, fzf, ecc. dal vecchio zshrc
+
+        # Esempio zoxide init
+        eval "$(zoxide init zsh)"
+      '';
+      oh-my-zsh = {
+        enable = true;
+        plugins = [ "git" "sudo" "thefuck" ];
+      };
+    };
+
+    neovim = {
+      enable = true;
+      defaultEditor = true; # Imposta EDITOR=nvim
+      viAlias = true;
+      vimAlias = true;
+      # Dipendenze extra per far funzionare Treesitter e Mason (se proprio insisti)
+      # withNodeJs = true; # Già incluso in molti casi, ma male non fa
+      # withPython3 = true;
     };
   };
-
-  # Configurazione ZSH
-  programs.zsh = {
-	enable = true;
-	oh-my-zsh = { # "ohMyZsh" without Home Manager
-	    enable = true;
-	    plugins = [ "git" "thefuck" ];
-	    theme = "robbyrussell";
-	};
-	shellAliases = {
-		cls = "clear";
-		update = "sudo nixos-rebuild switch --flake ~/nixos-config";
-	};
-	history.size = 10000;
-  };
-
-  # Configurazione NEOVIM
-  programs.neovim = {
-    enable = true;
-  };
-
   # --- 3. SERVIZI ---
   services.network-manager-applet.enable = true;
-  
+
   services.nextcloud-client = {
     enable = true;
     startInBackground = true;
