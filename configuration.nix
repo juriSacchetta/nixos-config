@@ -74,10 +74,36 @@
       };
     };
     fstrim.enable = true;
-    power-profiles-daemon.enable = true;
     gnome.gnome-keyring.enable = true;
     displayManager.cosmic-greeter.enable = true;
     desktopManager.cosmic.enable = true;
+    power-profiles-daemon.enable = false;
+    tlp = {
+      enable = true;
+      settings = {
+        # --- Gestione CPU (AMD Ryzen) ---
+        CPU_SCALING_GOVERNOR_ON_AC = "performance";
+        CPU_SCALING_GOVERNOR_ON_BAT = "powersave";
+
+        # Usa il driver amd-pstate (Active) che hai abilitato nel kernel
+        CPU_ENERGY_PERF_POLICY_ON_AC = "performance";
+        CPU_ENERGY_PERF_POLICY_ON_BAT = "power";
+
+        # --- Ottimizzazioni Piattaforma ---
+        PLATFORM_PROFILE_ON_AC = "performance";
+        PLATFORM_PROFILE_ON_BAT = "low-power";
+
+        # --- SOGLIE DI CARICA (Cruciale per ThinkPad) ---
+        # Ferma la carica all'80% per allungare la vita della batteria
+        # Inizia a caricare solo se scende sotto il 75%
+        START_CHARGE_THRESH_BAT0 = 75;
+        STOP_CHARGE_THRESH_BAT0 = 80;
+
+        # (Opzionale: se hai una seconda batteria esterna BAT1)
+        # START_CHARGE_THRESH_BAT1 = 75;
+        # STOP_CHARGE_THRESH_BAT1 = 80;
+      };
+    };
     dbus = {
       enable = true;
       packages = [ pkgs.dconf ];

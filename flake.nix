@@ -2,9 +2,6 @@
   description = "Nixos config flake";
 
   inputs = {
-    # Nixpkgs: usiamo il ramo unstable per avere software recente (stile Arch)
-    # nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-
     # Passiamo a stable ;)
     nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
