@@ -1,14 +1,20 @@
-# Edit this configuration file to define what should be installed on
-# your system.  Help is available in the configuration.nix(5) man page
-# and in the NixOS manual (accessible by running ‘nixos-help’).
-
 { config, pkgs, pkgs-unstable, inputs, ... }:
 
 {
   imports = [ ./hardware-configuration.nix ];
 
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
-  nix.registry.nixpkgs.flake = inputs.nixpkgs;
+  nix = {
+    gc = {
+      automatic = true;
+      dates = "weekly";
+      options = "--delete-older-than 7d";
+    };
+    settings = {
+      experimental-features = [ "nix-command" "flakes" ];
+      auto-optimise-store = true;
+    };
+    registry.nixpkgs.flake = inputs.nixpkgs;
+  };
   boot = {
     kernelPackages = pkgs.linuxPackages_latest;
     kernelParams = [ "amd_pstate=active" ];
