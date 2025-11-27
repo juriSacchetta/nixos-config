@@ -53,10 +53,25 @@
       statix
       nil
       nixfmt-classic
+      birdtray
     ];
   };
 
+  home.file.".tmux.conf" = {
+    source = "${inputs.oh-my-tmux}/.tmux.conf";
+    # Rendi la copia gestita da Nix. Non modificarla direttamente.
+  };
+
+  home.file.".tmux.conf.local" = {
+    source = "${inputs.oh-my-tmux}/.tmux.conf.local";
+    # Copia questo file in modo che tu possa modificarlo localmente 
+    # (o Home Manager lo creerà se non esiste)
+  };
   programs = {
+    thunderbird = {
+      enable = true;
+      profiles.js = { isDefault = true; };
+    };
     git = {
       enable = true;
       userName = "Juri Sacchetta";
@@ -86,13 +101,7 @@
       history.size = 10000;
       initContent = ''
         source ${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme
-
         [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
-
-        # --- Le tue funzioni personalizzate ---
-        # Qui puoi incollare le funzioni sgpt, fzf, ecc. dal vecchio zshrc
-
-        # Esempio zoxide init
       '';
       oh-my-zsh = {
         enable = true;
@@ -102,7 +111,7 @@
 
     neovim = {
       enable = true;
-      defaultEditor = true; # Imposta EDITOR=nvim
+      defaultEditor = true;
       viAlias = true;
       vimAlias = true;
       # Dipendenze extra per far funzionare Treesitter e Mason (se proprio insisti)

@@ -12,6 +12,10 @@
 
     zen-browser.url = "github:0xc000022070/zen-browser-flake";
     zen-browser.inputs.nixpkgs.follows = "nixpkgs-unstable";
+    oh-my-tmux = {
+      url = "github:gpakosz/.tmux";
+      flake = false; # Non è un flake, ma un semplice repository
+    };
   };
 
   outputs = { self, nixpkgs, nixpkgs-unstable, home-manager, ... }@inputs: {
@@ -35,6 +39,8 @@
           {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
+
+            home-manager.backupFileExtension = "backup";
 
             home-manager.users.js = import ./home.nix;
 
