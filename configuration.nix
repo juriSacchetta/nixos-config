@@ -17,7 +17,7 @@
   };
   boot = {
     kernelPackages = pkgs.linuxPackages_latest;
-    kernelParams = [ "amd_pstate=active" ];
+    kernelParams = [ "amd_pstate=active" "mem_sleep_default=deep" ];
     loader.systemd-boot.enable = true;
     loader.efi.canTouchEfiVariables = true;
   };

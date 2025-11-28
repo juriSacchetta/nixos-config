@@ -25,8 +25,9 @@
       gcc
       gnumake
       nodejs_22
-      python3
+      (python3.withPackages (p: [ p.ipython ]))
 
+      tree
       # App
       firefox
       neofetch
@@ -54,6 +55,13 @@
       nil
       nixfmt-classic
       birdtray
+
+      # ✅ RUST Toolchain Completa
+      rustc
+      cargo
+      rustfmt
+      clippy
+      rust-analyzer
     ];
   };
 
@@ -72,6 +80,32 @@
       enable = true;
       profiles.js = { isDefault = true; };
     };
+    alacritty = {
+      enable = true;
+      settings = {
+        window = {
+          padding = {
+            x = 0;
+            y = 0;
+          };
+          opacity = 0.98;
+        };
+
+        scrolling = { history = 10000; };
+
+        font = {
+          normal = { family = "MesloLGS Nerd Font"; };
+          size = 11.0;
+          offset = {
+            x = 0;
+            y = 0;
+          };
+        };
+
+        bell = { duration = 0; };
+      };
+    };
+
     git = {
       enable = true;
       userName = "Juri Sacchetta";
