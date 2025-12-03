@@ -76,6 +76,12 @@
     # (o Home Manager lo creerà se non esiste)
   };
   programs = {
+    direnv = {
+      enable = true;
+      enableZshIntegration = true; # Hooks into your Zsh automatically
+      nix-direnv.enable = true; # Better caching for Nix
+    };
+
     thunderbird = {
       enable = true;
       profiles.js = { isDefault = true; };
