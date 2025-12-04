@@ -116,6 +116,8 @@
     fwupd.enable = true;
   };
 
+  virtualisation.docker.enable = true;
+
   programs.dconf.enable = true;
   security.polkit.enable = true;
   programs.zsh.enable = true;
@@ -125,7 +127,7 @@
   users.users.js = {
     isNormalUser = true;
     description = "js";
-    extraGroups = [ "networkmanager" "wheel" ];
+    extraGroups = [ "networkmanager" "wheel" "docker" ];
     shell = pkgs.zsh;
   };
 

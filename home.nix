@@ -145,7 +145,7 @@
       '';
       oh-my-zsh = {
         enable = true;
-        plugins = [ "git" "sudo" "thefuck" ];
+        plugins = [ "git" "sudo" ];
       };
     };
 
