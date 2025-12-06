@@ -1,8 +1,14 @@
 { config, pkgs, pkgs-unstable, inputs, ... }:
 
 {
-  imports = [ ./hardware-configuration.nix ];
+  imports = [
+    ./hardware-configuration.nix
+    ./modules/amd-optimization.nix
+    ./modules/desktop.nix
+    ./modules/flatpak.nix
+  ];
 
+  # --- 1. System & Boot ---
   nix = {
     gc = {
       automatic = true;
@@ -15,6 +21,7 @@
     };
     registry.nixpkgs.flake = inputs.nixpkgs;
   };
+
   boot = {
     kernelPackages = pkgs.linuxPackages_latest;
     kernelParams = [ "amd_pstate=active" "mem_sleep_default=deep" ];
@@ -22,33 +29,27 @@
     loader.efi.canTouchEfiVariables = true;
   };
 
-  hardware = {
-    enableAllFirmware = true;
-    graphics = {
-      enable = true;
-      enable32Bit = true; # Per compatibilità Steam/Wine
-
-      extraPackages = with pkgs; [
-        amdvlk # Vulkan driver for AMD
-        mesa
-        libvdpau-va-gl
-      ];
-    };
-    #vulkan = {
-    #	enable = true;
-    #	package = pkgs.vulkan-loader;
-    #}; 
-  };
-
+  # --- 2. Networking & Services ---
   networking.hostName = "nixos"; # Define your hostname.
   networking.networkmanager.enable = true;
 
-  # Set your time zone.
+  services = {
+    fprintd.enable = true;
+    fstrim.enable = true;
+    fwupd.enable = true;
+
+    netbird = {
+      enable = true;
+      package = pkgs-unstable.netbird;
+    };
+  };
+
+  virtualisation.docker.enable = true;
+  security.polkit.enable = true;
+
+  # --- 3. Locale ---
   time.timeZone = "Europe/Rome";
-
-  # Select internationalisation properties.
   i18n.defaultLocale = "en_US.UTF-8";
-
   i18n.extraLocaleSettings = {
     LC_ADDRESS = "it_IT.UTF-8";
     LC_IDENTIFICATION = "it_IT.UTF-8";
@@ -61,98 +62,14 @@
     LC_TIME = "it_IT.UTF-8";
   };
 
-  services = {
-    fprintd.enable = true;
-    xserver = {
-      # enable = true;
-      # displayManager.gdm.enable = true;
-      # desktopManager.gnome.enable = true;
-
-      # Configure keymap in X11
-      xkb = {
-        layout = "us";
-        variant = "altgr-intl";
-      };
-    };
-    fstrim.enable = true;
-    gnome.gnome-keyring.enable = true;
-    displayManager.cosmic-greeter.enable = true;
-    desktopManager.cosmic.enable = true;
-    power-profiles-daemon.enable = false;
-    tlp = {
-      enable = true;
-      settings = {
-        # --- Gestione CPU (AMD Ryzen) ---
-        CPU_SCALING_GOVERNOR_ON_AC = "performance";
-        CPU_SCALING_GOVERNOR_ON_BAT = "powersave";
-
-        # Usa il driver amd-pstate (Active) che hai abilitato nel kernel
-        CPU_ENERGY_PERF_POLICY_ON_AC = "performance";
-        CPU_ENERGY_PERF_POLICY_ON_BAT = "power";
-
-        # --- Ottimizzazioni Piattaforma ---
-        PLATFORM_PROFILE_ON_AC = "performance";
-        PLATFORM_PROFILE_ON_BAT = "low-power";
-
-        # --- SOGLIE DI CARICA (Cruciale per ThinkPad) ---
-        # Ferma la carica all'80% per allungare la vita della batteria
-        # Inizia a caricare solo se scende sotto il 75%
-        START_CHARGE_THRESH_BAT0 = 75;
-        STOP_CHARGE_THRESH_BAT0 = 80;
-
-        # (Opzionale: se hai una seconda batteria esterna BAT1)
-        # START_CHARGE_THRESH_BAT1 = 75;
-        # STOP_CHARGE_THRESH_BAT1 = 80;
-      };
-    };
-    dbus = {
-      enable = true;
-      packages = [ pkgs.dconf ];
-    };
-    netbird = {
-      enable = true;
-      package = pkgs-unstable.netbird;
-    };
-    fwupd.enable = true;
-
-    flatpak = {
-      enable = true;
-
-      # Defines where to look for packages (Flathub is the standard)
-      remotes = [{
-        name = "flathub";
-        location = "https://flathub.org/repo/flathub.flatpakrepo";
-      }];
-
-      # The list of Flatpaks you want installed
-      packages = [
-        "com.logseq.Logseq"
-        "com.github.tchx84.Flatseal" # Recommended: GUI to manage permissions
-      ];
-
-      # Optional: Update Flatpaks every time you rebuild your system
-      update.onActivation = true;
-
-      # Optional: Uninstall Flatpaks that are not in this list (Keep it clean!)
-      uninstallUnmanaged = true;
-    };
-
-  };
-
-  virtualisation.docker.enable = true;
-
-  programs.dconf.enable = true;
-  security.polkit.enable = true;
-  programs.zsh.enable = true;
-  console.useXkbConfig = true;
-  nixpkgs.config.allowUnfree = true;
-
+  # --- 4. User & Packages ---
   users.users.js = {
     isNormalUser = true;
     description = "js";
     extraGroups = [ "networkmanager" "wheel" "docker" ];
     shell = pkgs.zsh;
   };
+  programs.zsh.enable = true;
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
@@ -165,11 +82,10 @@
     seahorse
     networkmanagerapplet
     xdg-utils
-    xdg-desktop-portal
-    xdg-desktop-portal-cosmic
     vulkan-loader
   ];
 
+  nixpkgs.config.allowUnfree = true;
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
   # programs.mtr.enable = true;
