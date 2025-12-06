@@ -42,6 +42,7 @@
 
   networking.hostName = "nixos"; # Define your hostname.
   networking.networkmanager.enable = true;
+  networking.firewall.checkReversePath = false;
 
   # Set your time zone.
   time.timeZone = "Europe/Rome";
@@ -61,6 +62,27 @@
     LC_TIME = "it_IT.UTF-8";
   };
 
+  # 3. Create the 'nordvpn' group
+  users.groups.nordvpn = { };
+
+  # 5. Manually define the systemd service (Daemon)
+  systemd.services.nordvpnd = {
+    description = "NordVPN Daemon";
+    wantedBy = [ "multi-user.target" ];
+    serviceConfig = {
+      ExecStart = "${pkgs-unstable.nordvpn}/bin/nordvpnd";
+      Restart = "always";
+      # Create the required directories with correct permissions
+      RuntimeDirectory = "nordvpn"; # /run/nordvpn
+      RuntimeDirectoryMode = "0750";
+      StateDirectory = "nordvpn"; # /var/lib/nordvpn
+      StateDirectoryMode = "0700";
+    };
+    # Ensure it has access to networking tools
+    path = [ pkgs.iproute2 pkgs.iptables ];
+  };
+
+  # 6. Recommended VPN firewall tweak
   services = {
     fprintd.enable = true;
     xserver = {
@@ -127,13 +149,14 @@
   users.users.js = {
     isNormalUser = true;
     description = "js";
-    extraGroups = [ "networkmanager" "wheel" "docker" ];
+    extraGroups = [ "networkmanager" "wheel" "docker" "nordvpn" ];
     shell = pkgs.zsh;
   };
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
+    pkgs-unstable.nordvpn
     vim
     wget
     htop
