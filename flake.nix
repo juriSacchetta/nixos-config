@@ -21,6 +21,7 @@
         "https://flakehub.com/f/Svenum/Solaar-Flake/*.tar.gz"; # For latest stable version
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nix-flatpak.url = "github:gmodena/nix-flatpak";
   };
 
   outputs =
@@ -57,6 +58,7 @@
                 inherit (nixpkgs-unstable) pkgs-unstable;
               };
             }
+            inputs.nix-flatpak.nixosModules.nix-flatpak
           ];
         };
       };

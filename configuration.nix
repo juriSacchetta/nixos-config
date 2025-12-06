@@ -114,6 +114,29 @@
       package = pkgs-unstable.netbird;
     };
     fwupd.enable = true;
+
+    flatpak = {
+      enable = true;
+
+      # Defines where to look for packages (Flathub is the standard)
+      remotes = [{
+        name = "flathub";
+        location = "https://flathub.org/repo/flathub.flatpakrepo";
+      }];
+
+      # The list of Flatpaks you want installed
+      packages = [
+        "com.logseq.Logseq"
+        "com.github.tchx84.Flatseal" # Recommended: GUI to manage permissions
+      ];
+
+      # Optional: Update Flatpaks every time you rebuild your system
+      update.onActivation = true;
+
+      # Optional: Uninstall Flatpaks that are not in this list (Keep it clean!)
+      uninstallUnmanaged = true;
+    };
+
   };
 
   virtualisation.docker.enable = true;
