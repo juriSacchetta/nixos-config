@@ -26,6 +26,7 @@
       gnumake
       nodejs_22
       (python3.withPackages (p: [ p.ipython ]))
+      gh
 
       tree
       # App
@@ -62,6 +63,9 @@
       rustfmt
       clippy
       rust-analyzer
+
+      zed
+      chromium
     ];
   };
 
@@ -114,11 +118,13 @@
 
     git = {
       enable = true;
+      package = pkgs.git.override { withLibsecret = true; };
       userName = "Juri Sacchetta";
       userEmail = "jurisacchetta@gmail.com";
       extraConfig = {
         core.editor = "nvim";
-        credential.helper = "store";
+        # credential.helper = "${pkgs.gh}/bin/gh auth git-credential";
+        credential.helper = "libsecret";
         init.defaultBranch = "main";
       };
     };

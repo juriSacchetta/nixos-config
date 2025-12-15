@@ -10,9 +10,13 @@
   };
   console.useXkbConfig = true;
 
+  # --- COSMIC & Display Manager ---
   services.displayManager.cosmic-greeter.enable = true;
   services.desktopManager.cosmic.enable = true;
+
+  # --- GNOME Keyring & Security ---
   services.gnome.gnome-keyring.enable = true;
+  security.pam.services.cosmic-greeter.enableGnomeKeyring = true;
 
   # Portals and Dbus usually go with Desktop
   services.dbus = {
