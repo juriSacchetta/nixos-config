@@ -67,6 +67,11 @@
       zed
       chromium
     ];
+    sessionVariables = {
+      # Forza le app Electron a usare Wayland nativo (risparmio CPU/Batteria)
+      NIXOS_OZONE_WL = "1";
+      MOZ_ENABLE_WAYLAND = "1";
+    };
   };
 
   home.file.".tmux.conf" = {
@@ -80,6 +85,10 @@
     # (o Home Manager lo creerà se non esiste)
   };
   programs = {
+    ssh = {
+      enable = true;
+      addKeysToAgent = "yes";
+    };
     direnv = {
       enable = true;
       enableZshIntegration = true; # Hooks into your Zsh automatically
@@ -167,7 +176,7 @@
 
     vscode = {
       enable = true;
-      extensions = with pkgs.vscode-extensions; [
+      profiles.default.extensions = with pkgs.vscode-extensions; [
         dracula-theme.theme-dracula
         vscodevim.vim
         yzhang.markdown-all-in-one
@@ -181,6 +190,7 @@
     };
   };
   # --- 3. SERVIZI ---
+  services.ssh-agent.enable = true;
   services.network-manager-applet.enable = true;
 
   services.nextcloud-client = {
@@ -191,4 +201,19 @@
   # --- 4. STATO ---
   home.stateVersion = "25.05";
   programs.home-manager.enable = true;
+
+  systemd.user.services.fix-dbus-environment = {
+    Unit = {
+      Description = "Fix DBus environment variables for Wayland/Cosmic";
+      After = [ "graphical-session.target" ];
+      PartOf = [ "graphical-session.target" ];
+    };
+    Service = {
+      Type = "oneshot";
+      # Esegue esattamente il comando che ti ha funzionato a mano
+      ExecStart =
+        "${pkgs.bash}/bin/bash -c '${pkgs.dbus}/bin/dbus-update-activation-environment --systemd DISPLAY XAUTHORITY WAYLAND_DISPLAY'";
+    };
+    Install = { WantedBy = [ "graphical-session.target" ]; };
+  };
 }

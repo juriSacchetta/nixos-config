@@ -23,8 +23,7 @@
   };
 
   boot = {
-    kernelPackages = pkgs.linuxPackages_latest;
-    kernelParams = [ "amd_pstate=active" "mem_sleep_default=deep" ];
+    kernelPackages = pkgs.linuxPackages_6_12;
     loader.systemd-boot.enable = true;
     loader.efi.canTouchEfiVariables = true;
   };
@@ -69,6 +68,9 @@
     extraGroups = [ "networkmanager" "wheel" "docker" ];
     shell = pkgs.zsh;
   };
+  programs.nix-ld.enable = true;
+
+  programs.nix-ld.libraries = with pkgs; [ stdenv.cc.cc.lib zlib ];
   programs.zsh.enable = true;
 
   # List packages installed in system profile. To search, run:

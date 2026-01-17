@@ -7,7 +7,11 @@
       name = "flathub";
       location = "https://flathub.org/repo/flathub.flatpakrepo";
     }];
-    packages = [ "com.logseq.Logseq" "com.github.tchx84.Flatseal" ];
+    packages = [
+      "com.logseq.Logseq"
+      "com.github.tchx84.Flatseal"
+      "org.libreoffice.LibreOffice"
+    ];
     update.onActivation = true;
     uninstallUnmanaged = true;
   };
