@@ -49,11 +49,14 @@
       PLATFORM_PROFILE_ON_AC = "performance";
       PLATFORM_PROFILE_ON_BAT = "low-power";
 
-      # --- FIX AGGIUNTIVO ---
-      # Impedisce a TLP di mandare in sleep il bus PCIe della scheda video
+      # --- Battery Health Optimization ---
+      # Prevent GPU PCIe link from entering power save during battery
       PCIE_ASPM_ON_AC = "performance";
       PCIE_ASPM_ON_BAT = "performance";
-      START_CHARGE_THRESH_BAT0 = 75;
+
+      # Battery charge thresholds (40-80% is optimal for longevity)
+      # Prevents constant 75-80% cycling which reduces battery lifespan
+      START_CHARGE_THRESH_BAT0 = 40;
       STOP_CHARGE_THRESH_BAT0 = 80;
     };
   };

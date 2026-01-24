@@ -28,12 +28,18 @@
     # kernelPackages = pkgs.linuxPackages_6_17;  # Uncomment to use stable 6.17.x
     kernelPackages = pkgs.linuxPackages_latest;   # Currently 6.18.x with workarounds
 
-    loader.systemd-boot.enable = true;
-    loader.efi.canTouchEfiVariables = true;
+    loader = {
+      systemd-boot = {
+        enable = true;
+        configurationLimit = 10;  # Keep only last 10 generations (prevents /boot from filling)
+        timeout = 3;              # Boot timeout in seconds (default is 5)
+      };
+      efi.canTouchEfiVariables = true;
+    };
   };
 
   # --- 2. Networking & Services ---
-  networking.hostName = "nixos"; # Define your hostname.
+  networking.hostName = "js-laptop";
   networking.networkmanager.enable = true;
 
   services = {
@@ -77,18 +83,22 @@
   programs.nix-ld.libraries = with pkgs; [ stdenv.cc.cc.lib zlib ];
   programs.zsh.enable = true;
 
-  # List packages installed in system profile. To search, run:
-  # $ nix search wget
+  # System-level packages (essential system tools only)
+  # User packages should go in home.nix for better isolation
   environment.systemPackages = with pkgs; [
-    vim
-    wget
-    htop
-    git
+    vim        # Essential editor for system recovery
+    git        # Required for flake operations
+    htop       # System monitoring (needed for multi-user systems)
+
+    # Network tools
     netcat-gnu
-    seahorse
-    networkmanagerapplet
-    xdg-utils
-    vulkan-loader
+
+    # Note: Removed duplicates that are in home.nix or desktop.nix:
+    # - wget (in home.nix)
+    # - seahorse (in desktop.nix)
+    # - networkmanagerapplet (user-specific, moving to home.nix)
+    # - xdg-utils (included by desktop environment)
+    # - vulkan-loader (should be in hardware.graphics.extraPackages)
   ];
 
   nixpkgs.config.allowUnfree = true;
