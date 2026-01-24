@@ -17,6 +17,11 @@
       fd
       wl-clipboard
 
+      # System monitoring
+      btop         # Modern system monitor (better than htop)
+      nvtop        # GPU monitor (supports AMD)
+      powertop     # Power consumption analysis
+
       # Tool per la Shell (Aggiunti dal tuo .zshrc)
       eza # Per gli alias ls, ll, lt
       bat # Per le funzioni di preview
