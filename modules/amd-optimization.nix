@@ -26,9 +26,11 @@
       enable = true;
       enable32Bit = true;
       extraPackages = with pkgs; [
-        # Note: VPE is disabled via kernel params, so hardware video encoding won't work
-        # Software encoding via ffmpeg will be used instead
-        libva-utils       # VA-API utilities for video acceleration
+        # Vulkan support (moved from system packages)
+        vulkan-loader
+
+        # Video acceleration (Note: VPE disabled, using software encoding)
+        libva-utils       # VA-API utilities
         vaapiVdpau        # VA-API to VDPAU translation
         libvdpau-va-gl    # VDPAU support
 
