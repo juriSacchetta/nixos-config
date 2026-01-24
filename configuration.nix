@@ -43,8 +43,8 @@
       systemd-boot = {
         enable = true;
         configurationLimit = 10;  # Keep only last 10 generations (prevents /boot from filling)
-        timeout = 3;              # Boot timeout in seconds (default is 5)
       };
+      timeout = 3;  # Boot menu timeout in seconds (default is 5)
       efi.canTouchEfiVariables = true;
     };
 
