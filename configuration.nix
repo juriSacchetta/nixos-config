@@ -23,7 +23,11 @@
   };
 
   boot = {
-    kernelPackages = pkgs.linuxPackages_6_12;
+    # TEMPORARY: Use 6.17.x until 6.18.x/6.19.x amdgpu bugs are fixed
+    # See: https://community.frame.work/t/attn-critical-bugs-in-amdgpu-driver-included-with-kernel-6-18-x-6-19-x/79221
+    # kernelPackages = pkgs.linuxPackages_6_17;  # Uncomment to use stable 6.17.x
+    kernelPackages = pkgs.linuxPackages_latest;   # Currently 6.18.x with workarounds
+
     loader.systemd-boot.enable = true;
     loader.efi.canTouchEfiVariables = true;
   };

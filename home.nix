@@ -66,6 +66,9 @@
 
       zed
       chromium
+
+      man-pages
+      man-pages-posix
     ];
     sessionVariables = {
       # Forza le app Electron a usare Wayland nativo (risparmio CPU/Batteria)
