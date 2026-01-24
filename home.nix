@@ -21,6 +21,9 @@
       eza # Per gli alias ls, ll, lt
       bat # Per le funzioni di preview
 
+      # System utilities (moved from system packages)
+      networkmanagerapplet  # GUI for NetworkManager
+
       # Dev
       gcc
       gnumake
