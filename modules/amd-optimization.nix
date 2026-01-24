@@ -44,20 +44,37 @@
   services.tlp = {
     enable = true;
     settings = {
+      # CPU Performance Management
       CPU_SCALING_GOVERNOR_ON_AC = "performance";
       CPU_SCALING_GOVERNOR_ON_BAT = "powersave";
       CPU_ENERGY_PERF_POLICY_ON_AC = "performance";
       CPU_ENERGY_PERF_POLICY_ON_BAT = "power";
+
+      # AMD-specific: CPU boost behavior
+      CPU_BOOST_ON_AC = 1;
+      CPU_BOOST_ON_BAT = 0;
+
+      # Platform profiles (AMD-specific)
       PLATFORM_PROFILE_ON_AC = "performance";
       PLATFORM_PROFILE_ON_BAT = "low-power";
 
-      # --- Battery Health Optimization ---
-      # Prevent GPU PCIe link from entering power save during battery
+      # GPU Power Management (AMD)
+      RADEON_DPM_PERF_LEVEL_ON_AC = "auto";
+      RADEON_DPM_PERF_LEVEL_ON_BAT = "low";
+      RADEON_DPM_STATE_ON_AC = "performance";
+      RADEON_DPM_STATE_ON_BAT = "battery";
+
+      # PCIe Active State Power Management
+      # Keep GPU PCIe at performance to prevent stability issues
       PCIE_ASPM_ON_AC = "performance";
       PCIE_ASPM_ON_BAT = "performance";
 
-      # Battery charge thresholds (40-80% is optimal for longevity)
-      # Prevents constant 75-80% cycling which reduces battery lifespan
+      # USB autosuspend (useful for battery, but exclude input devices)
+      USB_AUTOSUSPEND = 1;
+      USB_EXCLUDE_BTUSB = 1;  # Don't suspend Bluetooth
+      USB_EXCLUDE_PHONE = 1;  # Don't suspend tethered phones
+
+      # Battery Charge Thresholds (40-80% for longevity)
       START_CHARGE_THRESH_BAT0 = 40;
       STOP_CHARGE_THRESH_BAT0 = 80;
     };

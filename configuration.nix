@@ -120,15 +120,19 @@
     git        # Required for flake operations
     htop       # System monitoring (needed for multi-user systems)
 
+    # Hardware inspection tools (useful for sysadmin/security work)
+    pciutils   # lspci - PCI device inspection
+    usbutils   # lsusb - USB device inspection
+
     # Network tools
     netcat-gnu
 
     # Note: Removed duplicates that are in home.nix or desktop.nix:
     # - wget (in home.nix)
     # - seahorse (in desktop.nix)
-    # - networkmanagerapplet (user-specific, moving to home.nix)
+    # - networkmanagerapplet (user-specific, moved to home.nix)
     # - xdg-utils (included by desktop environment)
-    # - vulkan-loader (should be in hardware.graphics.extraPackages)
+    # - vulkan-loader (moved to hardware.graphics.extraPackages)
   ];
 
   nixpkgs.config.allowUnfree = true;

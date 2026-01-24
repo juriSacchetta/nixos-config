@@ -147,7 +147,7 @@
       enable = true;
       enableCompletion = true;
 
-      # Plugin nativi (molto più veloci di Oh My Zsh)
+      # Fast native plugins (better than Oh My Zsh alternatives)
       autosuggestion.enable = true;
       syntaxHighlighting.enable = true;
 
@@ -159,15 +159,22 @@
         lt = "eza -a --tree --level=1 --icons";
         cd = "z";
       };
-      history.size = 10000;
-      initContent = ''
-        source ${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme
-        [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
-      '';
+
+      history = {
+        size = 10000;
+        path = "$HOME/.zsh_history";
+      };
+
       oh-my-zsh = {
         enable = true;
         plugins = [ "git" "sudo" ];
       };
+
+      # Powerlevel10k theme (loaded after oh-my-zsh)
+      initExtra = ''
+        source ${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme
+        [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+      '';
     };
 
     neovim = {
