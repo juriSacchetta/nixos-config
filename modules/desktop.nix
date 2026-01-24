@@ -1,14 +1,12 @@
 { config, pkgs, ... }:
 
 {
-  services.xserver = {
-    # enable = true; # Keep your comments if you wish
-    xkb = {
-      layout = "us";
-      variant = "altgr-intl";
-    };
+  # Keyboard layout (applies to both X11 and Wayland)
+  services.xserver.xkb = {
+    layout = "us";
+    variant = "altgr-intl";
   };
-  console.useXkbConfig = true;
+  console.useXkbConfig = true;  # Use same layout in console
   # --- BLUETOOTH FIX ---
   hardware.bluetooth.enable = true;
   hardware.bluetooth.powerOnBoot = true;
@@ -18,15 +16,13 @@
   services.displayManager.cosmic-greeter.enable = true;
   services.desktopManager.cosmic.enable = true;
 
-  # --- GNOME Keyring & Security (Setup Minimale) ---
+  # --- GNOME Keyring & Security ---
   services.gnome.gnome-keyring.enable = true;
 
-  # Abilita lo sblocco su TUTTI i possibili greeter
+  # Enable keyring unlock at login (cosmic-greeter handles this)
   security.pam.services.cosmic-greeter.enableGnomeKeyring = true;
-  security.pam.services.login.enableGnomeKeyring = true; # Fallback standard
-  security.pam.services.greetd.enableGnomeKeyring =
-    true; # Spesso usato sotto cosmic
-  # Pacchetti essenziali
+
+  # Essential packages for keyring management
   environment.systemPackages = with pkgs; [ seahorse libsecret gcr ];
 
   # Registra i servizi su D-Bus
