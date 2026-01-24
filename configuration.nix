@@ -18,6 +18,17 @@
     settings = {
       experimental-features = [ "nix-command" "flakes" ];
       auto-optimise-store = true;
+
+      # Performance: Use all available cores for building
+      max-jobs = "auto";
+      cores = 0;  # 0 = use all available cores
+
+      # Trusted users can use additional features without sudo
+      trusted-users = [ "root" "@wheel" ];
+
+      # Keep build dependencies for faster rebuilds
+      keep-outputs = true;
+      keep-derivations = true;
     };
     registry.nixpkgs.flake = inputs.nixpkgs;
   };
@@ -35,6 +46,18 @@
         timeout = 3;              # Boot timeout in seconds (default is 5)
       };
       efi.canTouchEfiVariables = true;
+    };
+
+    # Kernel parameters for performance
+    kernel.sysctl = {
+      # Network performance (useful for fuzzing/CTF work)
+      "net.core.default_qdisc" = "cake";
+
+      # Virtual memory optimization
+      "vm.swappiness" = 10;  # Prefer RAM over swap
+
+      # File system performance
+      "fs.inotify.max_user_watches" = 524288;  # For development tools
     };
   };
 
@@ -55,6 +78,13 @@
 
   virtualisation.docker.enable = true;
   security.polkit.enable = true;
+
+  # Zram: Compressed RAM-based swap (better than disk swap)
+  zramSwap = {
+    enable = true;
+    algorithm = "zstd";  # Fast compression
+    memoryPercent = 50;  # Use up to 50% of RAM for compressed swap
+  };
 
   # --- 3. Locale ---
   time.timeZone = "Europe/Rome";
@@ -102,6 +132,12 @@
   ];
 
   nixpkgs.config.allowUnfree = true;
+
+  # Documentation
+  documentation = {
+    man.generateCaches = true;  # Faster man page searches
+    dev.enable = true;          # Development documentation
+  };
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
   # programs.mtr.enable = true;
