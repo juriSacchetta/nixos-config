@@ -25,8 +25,8 @@
   # Essential packages for keyring management
   environment.systemPackages = with pkgs; [ seahorse libsecret gcr ];
 
-  # Registra i servizi su D-Bus
-  services.dbus.packages = [ pkgs.gcr pkgs.seahorse ];
+  # Register gcr on D-Bus
+  services.dbus.packages = [ pkgs.gcr ];
 
   # Portals
   xdg.portal = {

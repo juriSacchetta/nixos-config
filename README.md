@@ -71,6 +71,15 @@ cd ~/nixos-config
 # Update hardware-configuration.nix for your hardware:
 sudo nixos-generate-config --show-hardware-config > hardware-configuration.nix
 
+# Set up secrets (if using sops-nix)
+# 1. Generate an age key:
+age-keygen -o ~/.config/sops/age/keys.txt
+# 2. Copy the public key and update secrets/secrets.yaml.example
+# 3. Create and encrypt your secrets file:
+cp secrets/secrets.yaml.example secrets/secrets.yaml
+# Edit with your actual tokens, then encrypt:
+sops -e -i secrets/secrets.yaml
+
 # Apply the configuration
 sudo nixos-rebuild switch --flake ~/nixos-config
 ```
@@ -88,6 +97,9 @@ nixos-config/
 │   ├── amd-optimization.nix     # AMD GPU/CPU optimizations
 │   ├── desktop.nix              # Desktop environment setup
 │   └── flatpak.nix              # Flatpak package management
+├── secrets/
+│   ├── .keep                    # Ensures directory exists
+│   └── secrets.yaml.example     # Template for encrypted secrets
 └── CLAUDE.md                    # AI assistant instructions
 ```
 
@@ -153,14 +165,22 @@ sudo nixos-rebuild boot --flake ~/nixos-config
 
 ### AMD GPU Stability
 
-Critical kernel parameters for GPU stability:
+The configuration includes several kernel parameters for GPU stability on Strix Point. Currently active parameters:
 
-- MES (Micro Engine Scheduler) disabled: `amdgpu.mes=0`
-- Runtime PM disabled: `amdgpu.runpm=0`
-- GPU recovery enabled
-- IOMMU in passthrough mode
+- GPU recovery enabled: `amdgpu.gpu_recovery=1`
+- CWSR disabled: `amdgpu.cwsr_enable=0` (fixes Gentoo bug #967078)
+- VPE disabled via IP block mask: `amdgpu.ip_block_mask=0xfffff7ff` (fixes VPE queue reset failures)
+- IOMMU in passthrough mode: `iommu=pt`
+- AMD P-State active governor: `amd_pstate=active`
 
-See `modules/amd-optimization.nix` for complete configuration.
+**Optional parameters** (currently commented out in `modules/amd-optimization.nix`):
+- Disable runtime PM if suspend/resume issues occur: `amdgpu.runpm=0`
+- Disable GFX power saving if freezes during idle: `amdgpu.gfx_off=0`
+- Disable PSR if screen flickering with external displays: `amdgpu.dcdebugmask=0x10`
+
+If you experience specific GPU issues, you can uncomment the relevant optional parameters in `modules/amd-optimization.nix`.
+
+See `modules/amd-optimization.nix` for complete configuration and detailed comments.
 
 ### Credential Management
 
@@ -197,6 +217,7 @@ Includes: lspci, glxinfo, vulkaninfo, nvtop, stress-ng, s-tui, mesa-demos
 - **oh-my-tmux**: Tmux configuration framework
 - **solaar**: Logitech device manager
 - **nix-flatpak**: Declarative Flatpak management
+- **sops-nix**: Secrets management with age encryption
 
 ## Notes
 
@@ -206,6 +227,7 @@ This is a **personal configuration** tailored to my specific hardware and workfl
 - Hardware-specific optimizations may not apply to your system
 - Always review and test configurations before applying
 - The `hardware-configuration.nix` is specific to my machine
+- Secrets are managed with sops-nix and gitignored (use the template to create your own)
 
 ## State Versions
 
@@ -220,3 +242,4 @@ This is a **personal configuration** tailored to my specific hardware and workfl
 - [Home Manager Manual](https://nix-community.github.io/home-manager/)
 - [Nix Flakes Documentation](https://nixos.wiki/wiki/Flakes)
 - [COSMIC Desktop](https://system76.com/cosmic)
+- [sops-nix Documentation](https://github.com/Mic92/sops-nix)

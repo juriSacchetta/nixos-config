@@ -23,8 +23,8 @@
       max-jobs = "auto";
       cores = 0;  # 0 = use all available cores
 
-      # Trusted users can use additional features without sudo
-      trusted-users = [ "root" "@wheel" ];
+      # Safer public default: only root is trusted for privileged Nix operations.
+      trusted-users = [ "root" ];
 
       # Keep build dependencies for faster rebuilds
       keep-outputs = true;

@@ -1,83 +1,122 @@
-{ inputs, config, pkgs, ... }:
+{ inputs, config, pkgs, pkgs-unstable, ... }: {
+  imports = [ inputs.sops-nix.homeManagerModules.sops ];
 
-{
+  sops = {
+    age.keyFile = "/home/js/.config/sops/age/keys.txt";
+    # Keep encrypted secrets out of the public repo; create this file locally.
+    defaultSopsFile = ./secrets/secrets.yaml;
+
+    secrets.github_token = { };
+  };
   home = {
     username = "js";
     homeDirectory = "/home/js";
 
     # --- 1. PACCHETTI UTENTE ---
-    packages = with pkgs; [
-      # Core
-      tmux
-      dnsutils
-      wget
-      curl
-      unzip
-      ripgrep
-      fd
-      wl-clipboard
+    packages = with pkgs;
+      let
+        aider-pro = pkgs.writeShellScriptBin "aider-pro" ''
+          TOKEN=$(cat ${config.sops.secrets.github_token.path})
 
-      # System monitoring
-      btop         # Modern system monitor (better than htop)
-      nvtopPackages.full  # GPU monitor (supports AMD, NVIDIA, Intel)
-      powertop     # Power consumption analysis
+          # Variabili base per l'auth
+          export GITHUB_TOKEN="$TOKEN"
+          export AIDER_GITHUB_COPILOT_API_KEY="$TOKEN"
 
-      # Tool per la Shell (Aggiunti dal tuo .zshrc)
-      eza # Per gli alias ls, ll, lt
-      bat # Per le funzioni di preview
+          # Modelli
+          ARCHITECT="github_copilot/gpt-5.2"
+          EDITOR="github_copilot/claude-sonnet-4.5"
 
-      # System utilities (moved from system packages)
-      networkmanagerapplet  # GUI for NetworkManager
+          echo "Mode: GitHub Copilot Business"
 
-      # Dev
-      gcc
-      gnumake
-      nodejs_22
-      (python3.withPackages (p: [ p.ipython ]))
-      gh
+          ${pkgs-unstable.aider-chat}/bin/aider \
+            --architect \
+            --model "$ARCHITECT" \
+            --editor-model "$EDITOR" \
+            --model-settings-file ~/.aider.model.settings.yml \
+            --cache-prompts \
+            --no-auto-commits \
+            --watch-files \
+            --no-show-model-warnings \
+            --no-attribute-author \
+            --no-attribute-committer \
+            --no-attribute-commit-message-author \
+            --no-attribute-commit-message-committer \
+            "$@"
+        '';
+      in [
+        # Core
+        tmux
+        dnsutils
+        wget
+        curl
+        unzip
+        ripgrep
+        fd
+        wl-clipboard
 
-      tree
-      # App
-      firefox
-      neofetch
-      spotify
-      inputs.zen-browser.packages."${pkgs.system}".default
+        # System monitoring
+        btop # Modern system monitor (better than htop)
+        nvtopPackages.full # GPU monitor (supports AMD, NVIDIA, Intel)
+        powertop # Power consumption analysis
 
-      # --- FONT ---
-      # Font di base per una buona copertura Unicode/Emoji
-      noto-fonts
-      noto-fonts-cjk-sans
-      noto-fonts-emoji
+        # Tool per la Shell (Aggiunti dal tuo .zshrc)
+        eza # Per gli alias ls, ll, lt
+        bat # Per le funzioni di preview
 
-      # Icone per barre di stato e applicazioni
-      font-awesome
+        # Dev
+        gcc
+        gnumake
+        nodejs_22
+        (python3.withPackages (p: [ p.ipython ]))
+        gh
 
-      # Nerd Fonts (Cruciali per P10K e Neovim)
-      # Usa il namespace 'nerd-fonts' per installare solo quelli che ti servono
-      nerd-fonts.jetbrains-mono # Ottimo per il coding
-      nerd-fonts.fira-code # Altra ottima scelta con legature
-      nerd-fonts.meslo-lg # Raccomandato ufficialmente da Powerlevel10k
-      nerd-fonts.symbols-only # Se vuoi solo le icone
+        tree
+        # App
+        firefox
+        neofetch
+        spotify
+        inputs.zen-browser.packages."${pkgs.system}".default
 
-      # Packages per LazyVim
-      statix
-      nil
-      nixfmt-classic
-      birdtray
+        # --- FONT ---
+        # Font di base per una buona copertura Unicode/Emoji
+        noto-fonts
+        noto-fonts-cjk-sans
+        noto-fonts-emoji
 
-      # ✅ RUST Toolchain Completa
-      rustc
-      cargo
-      rustfmt
-      clippy
-      rust-analyzer
+        # Icone per barre di stato e applicazioni
+        font-awesome
 
-      zed
-      chromium
+        # Nerd Fonts (Cruciali per P10K e Neovim)
+        # Usa il namespace 'nerd-fonts' per installare solo quelli che ti servono
+        nerd-fonts.jetbrains-mono # Ottimo per il coding
+        nerd-fonts.fira-code # Altra ottima scelta con legature
+        nerd-fonts.meslo-lg # Raccomandato ufficialmente da Powerlevel10k
+        nerd-fonts.symbols-only # Se vuoi solo le icone
 
-      man-pages
-      man-pages-posix
-    ];
+        # Packages per LazyVim
+        statix
+        nil
+        nixfmt-classic
+        birdtray
+
+        # ✅ RUST Toolchain Completa
+        rustc
+        cargo
+        rustfmt
+        clippy
+        rust-analyzer
+
+        zed
+        chromium
+
+        man-pages
+        man-pages-posix
+
+        aider-pro
+        ctags # Utile per la repo map di Aider
+
+        pkgs-unstable.aider-chat
+      ];
     sessionVariables = {
       # Forza le app Electron a usare Wayland nativo (risparmio CPU/Batteria)
       NIXOS_OZONE_WL = "1";
@@ -95,6 +134,39 @@
     # Copia questo file in modo che tu possa modificarlo localmente 
     # (o Home Manager lo creerà se non esiste)
   };
+
+  # Configurazione persistente di Aider
+  home.file.".aider.conf.yml".text = ''
+    # --- UI & Aspetto ---
+    dark-mode: true
+    pretty: true
+    stream: true
+
+    # --- Intelligenza sulla Repo ---
+    # 1024 è il default, ma con Claude Sonnet (che ha una finestra enorme) 
+    # possiamo alzare a 2048 o 4096 per dare ad Aider una visione più ampia del progetto.
+    map-tokens: 2048
+
+    check-update: false
+
+  '';
+  home.file.".aider.model.settings.yml".text = ''
+    - name: github_copilot/gpt-5.2
+      extra_params:
+        extra_headers:
+          Editor-Version: "vscode/1.96.2"
+          Editor-Plugin-Version: "copilot/1.256.0"
+          Copilot-Integration-Id: "vscode-chat"
+          User-Agent: "GithubCopilot/1.256.0"
+
+    - name: github_copilot/claude-sonnet-4.5
+      extra_params:
+        extra_headers:
+          Editor-Version: "vscode/1.96.2"
+          Editor-Plugin-Version: "copilot/1.256.0"
+          Copilot-Integration-Id: "vscode-chat"
+          User-Agent: "GithubCopilot/1.256.0"
+  '';
   programs = {
     ssh = {
       enable = true;

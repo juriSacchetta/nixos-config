@@ -22,24 +22,29 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nix-flatpak.url = "github:gmodena/nix-flatpak";
+    sops-nix.url = "github:Mic92/sops-nix";
+    sops-nix.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs =
-    { self, nixpkgs, nixpkgs-unstable, home-manager, solaar, ... }@inputs: {
+  outputs = { self, nixpkgs, nixpkgs-unstable, home-manager, solaar, sops-nix
+    , ... }@inputs: {
       nixosConfigurations = {
-        nixos = nixpkgs.lib.nixosSystem {
+        nixos = let
           system = "x86_64-linux";
+
+          pkgs-unstable = import nixpkgs-unstable {
+            inherit system;
+            config.allowUnfree = true;
+          };
+        in nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
+
           specialArgs = {
             inherit inputs;
-
-            pkgs-unstable = import nixpkgs-unstable {
-              system = "x86_64-linux";
-              config.allowUnfree = true;
-            };
+            inherit pkgs-unstable;
           };
           modules = [
             ./configuration.nix
-            ./hardware-configuration.nix
 
             solaar.nixosModules.default
 
@@ -55,7 +60,7 @@
 
               home-manager.extraSpecialArgs = {
                 inherit inputs;
-                inherit (nixpkgs-unstable) pkgs-unstable;
+                inherit pkgs-unstable;
               };
             }
             inputs.nix-flatpak.nixosModules.nix-flatpak
@@ -65,7 +70,10 @@
       # NUOVA SEZIONE: Ambienti di sviluppo (Shells)
       devShells.x86_64-linux = let
         # Definisce il set di pacchetti 'pkgs' per l'architettura x86_64-linux
-        pkgs = import nixpkgs { system = "x86_64-linux"; };
+        pkgs = import nixpkgs {
+          system = "x86_64-linux";
+          config.allowUnfree = true;
+        };
       in {
 
         # 1. Definiamo la nostra shell "dev-tools" usando mkShell (la funzione standard)
@@ -95,11 +103,10 @@
 
           # 3. Variabili d'ambiente (opzionale, ma utile)
           shellHook = ''
-            echo "Entering Persistent Nix Shell: dev-tools 🚀"
+            echo "Entering Persistent Nix Shell: dev-tools"
             echo "Available commands: lspci, glxinfo, vulkaninfo, stress-ng, glmark2, vkmark, htop."
           '';
         };
       };
     };
 }
-

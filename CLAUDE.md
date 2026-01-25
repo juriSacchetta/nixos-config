@@ -58,6 +58,7 @@ nix flake lock --update-input nixpkgs
   - `oh-my-tmux`: Configuration framework (non-flake)
   - `solaar`: Logitech device manager
   - `nix-flatpak`: Declarative Flatpak management
+  - `sops-nix`: Secrets management with age encryption
 - **Special Arguments**:
   - `inputs`: All flake inputs passed to modules
   - `pkgs-unstable`: Unstable nixpkgs set (created in flake.nix:35-38)
@@ -71,8 +72,9 @@ The configuration is split into focused modules in the `modules/` directory:
    - Kernel parameters for AMD GPUs (amdgpu driver settings)
    - TLP power management profiles
    - Hardware acceleration setup
-   - CRITICAL: MES is disabled (`amdgpu.mes=0`) for stability
-   - Runtime PM disabled (`amdgpu.runpm=0`) to prevent GPU suspend issues
+   - Current active parameters: gpu_recovery, cwsr_enable=0, VPE disabled via ip_block_mask
+   - Optional toggles (commented): runpm, gfx_off, dcdebugmask for specific issues
+   - See inline comments for detailed explanations
 
 2. **desktop.nix**: Desktop environment and input
    - COSMIC desktop environment with cosmic-greeter
@@ -108,26 +110,38 @@ The configuration is split into focused modules in the `modules/` directory:
   - Tmux configuration via oh-my-tmux
   - Custom systemd service to fix DBus environment for Wayland
   - Environment variables for Wayland support (NIXOS_OZONE_WL, MOZ_ENABLE_WAYLAND)
+  - Aider integration with GitHub Copilot via sops-encrypted token
 
 - **hardware-configuration.nix**: Auto-generated hardware configuration
   - DO NOT manually edit unless necessary
   - Regenerate with: `nixos-generate-config`
 
+- **secrets/**: Encrypted secrets managed by sops-nix
+  - `secrets.yaml`: Encrypted secrets file (gitignored, not in repo)
+  - `secrets.yaml.example`: Template for creating your own secrets
+  - `.keep`: Ensures directory exists in git
+  - Uses age encryption with keys stored in `~/.config/sops/age/keys.txt`
+
 ### Key Technical Decisions
 
 1. **Kernel**: Latest kernel package (`linuxPackages_latest`) in configuration.nix:26
    - Recent commits show kernel 6.12 downgrade was necessary for GPU stability
+   - Now using 6.18+ with specific workarounds
 
 2. **AMD GPU Stability**:
-   - MES (Micro Engine Scheduler) disabled for stability
+   - CWSR disabled (fixes Gentoo bug #967078)
+   - VPE disabled via IP block mask (fixes queue reset failures)
    - GPU recovery enabled
    - IOMMU in passthrough mode
-   - See modules/amd-optimization.nix for all parameters
+   - Optional parameters commented out: runpm, gfx_off, dcdebugmask
+   - Uncomment optional parameters only if experiencing specific issues
+   - See modules/amd-optimization.nix for all parameters and detailed comments
 
 3. **Credential Management**:
    - Git uses libsecret (home.nix:139) backed by GNOME Keyring
    - PAM configured to unlock keyring at login (desktop.nix:25-28)
    - Seahorse installed for GUI keyring management
+   - GitHub token for Aider stored in sops-encrypted secrets.yaml
 
 4. **Power Management**:
    - TLP used instead of power-profiles-daemon
@@ -139,6 +153,12 @@ The configuration is split into focused modules in the `modules/` directory:
    - Zoxide for smart directory navigation (`z` command)
    - Custom alias: `update` for system rebuilds
    - Direnv with nix-direnv for per-project environments
+
+6. **Secrets Management**:
+   - sops-nix for encrypted secrets
+   - Age encryption (keys in ~/.config/sops/age/keys.txt)
+   - secrets.yaml is gitignored and NOT in repository
+   - Use secrets.yaml.example as template
 
 ## Common Patterns
 
@@ -185,6 +205,29 @@ packages = [
 ];
 ```
 
+### Managing Secrets with sops-nix
+
+1. Generate age key (one-time):
+```bash
+age-keygen -o ~/.config/sops/age/keys.txt
+```
+
+2. Create secrets file from template:
+```bash
+cp secrets/secrets.yaml.example secrets/secrets.yaml
+```
+
+3. Edit with your values, then encrypt:
+```bash
+sops -e -i secrets/secrets.yaml
+```
+
+4. Reference in configuration:
+```nix
+sops.secrets.my_secret = { };
+# Access via: config.sops.secrets.my_secret.path
+```
+
 ## Important Notes
 
 - System state version: 25.05 (NEVER change without reading documentation)
@@ -194,3 +237,7 @@ packages = [
 - Locale: en_US.UTF-8 with Italian regional settings
 - Home Manager backups created with .backup extension
 - Nix garbage collection runs weekly, removes >7 day old generations
+- **Secrets**: The actual `secrets/secrets.yaml` file is gitignored and NOT in the repository
+  - Use `secrets/secrets.yaml.example` as a template to create your own
+  - Encrypt with sops before use
+  - Never commit unencrypted secrets
