@@ -19,7 +19,7 @@
 
       # System monitoring
       btop         # Modern system monitor (better than htop)
-      nvtop        # GPU monitor (supports AMD)
+      nvtopPackages.full  # GPU monitor (supports AMD, NVIDIA, Intel)
       powertop     # Power consumption analysis
 
       # Tool per la Shell (Aggiunti dal tuo .zshrc)
@@ -158,7 +158,7 @@
 
       shellAliases = {
         cls = "clear";
-        update = "sudo nixos-rebuild switch --flake ~/nixos-config";
+        update = "sudo nixos-rebuild switch --flake ~/nixos-config#nixos";
         ls = "eza --icons";
         ll = "eza -al --icons";
         lt = "eza -a --tree --level=1 --icons";
