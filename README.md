@@ -1,12 +1,27 @@
-# NixOS Configuration
+# NixOS Configuration for AMD Ryzen AI 7 PRO 350 (Strix Point)
 
-Personal NixOS configuration using flakes and Home Manager for my daily driver system. This configuration is modular, declarative, and optimized for AMD hardware with COSMIC desktop environment.
+Personal NixOS configuration using flakes and Home Manager for a Lenovo ThinkPad with AMD Ryzen AI 7 PRO 350 (Strix Point) and Radeon 860M graphics. This configuration features modular design, AMD GPU optimizations, and the COSMIC desktop environment.
 
-## System Specifications
+## Hardware Specifications
+
+This configuration is optimized for the following hardware:
+
+| Component | Specification |
+|-----------|---------------|
+| **Laptop** | Lenovo ThinkPad (21QJCTO1WW) |
+| **CPU** | AMD Ryzen AI 7 PRO 350 (Strix Point) |
+| **Cores/Threads** | 8 cores / 16 threads |
+| **GPU** | AMD Radeon 860M (integrated - RDNA 3.5) |
+| **RAM** | 28 GB |
+| **Storage** | 1TB Micron NVMe SSD (MTFDKBA1T0TGD) |
+| **Encryption** | LUKS full disk encryption |
+
+> **Note**: This is a Ryzen AI 300 series laptop (Strix Point architecture). The AMD optimizations in this config are specifically tuned for this hardware platform.
+
+## Software Environment
 
 - **Desktop Environment**: COSMIC with cosmic-greeter
-- **Hardware**: AMD CPU/GPU (Strix Point optimizations)
-- **Kernel**: Latest Linux kernel with AMD-specific optimizations
+- **Kernel**: Latest Linux kernel (6.18+) with AMD-specific optimizations
 - **Shell**: Zsh with powerlevel10k theme
 - **Editor**: Neovim (default) + VSCode
 - **Terminal**: Alacritty with Wayland support
