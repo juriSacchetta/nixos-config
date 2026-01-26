@@ -4,27 +4,27 @@
 { config, lib, pkgs, modulesPath, ... }:
 
 {
-  imports =
-    [ (modulesPath + "/installer/scan/not-detected.nix")
-    ];
+  imports = [ (modulesPath + "/installer/scan/not-detected.nix") ];
 
-  boot.initrd.availableKernelModules = [ "nvme" "xhci_pci" "thunderbolt" "usb_storage" "sd_mod" ];
+  boot.initrd.availableKernelModules =
+    [ "nvme" "xhci_pci" "thunderbolt" "usb_storage" "sd_mod" ];
   boot.initrd.kernelModules = [ ];
   boot.kernelModules = [ "kvm-amd" ];
   boot.extraModulePackages = [ ];
 
-  fileSystems."/" =
-    { device = "/dev/disk/by-uuid/c74e6c2b-d6b6-4c9d-80d6-d6bba0bbc7f0";
-      fsType = "ext4";
-    };
+  fileSystems."/" = {
+    device = "/dev/disk/by-uuid/c74e6c2b-d6b6-4c9d-80d6-d6bba0bbc7f0";
+    fsType = "ext4";
+  };
 
-  boot.initrd.luks.devices."luks-8769525d-2ad5-4a15-9746-9ae763df2025".device = "/dev/disk/by-uuid/8769525d-2ad5-4a15-9746-9ae763df2025";
+  boot.initrd.luks.devices."luks-8769525d-2ad5-4a15-9746-9ae763df2025".device =
+    "/dev/disk/by-uuid/8769525d-2ad5-4a15-9746-9ae763df2025";
 
-  fileSystems."/boot" =
-    { device = "/dev/disk/by-uuid/49F2-85CE";
-      fsType = "vfat";
-      options = [ "fmask=0077" "dmask=0077" ];
-    };
+  fileSystems."/boot" = {
+    device = "/dev/disk/by-uuid/49F2-85CE";
+    fsType = "vfat";
+    options = [ "fmask=0077" "dmask=0077" ];
+  };
 
   swapDevices = [ ];
 
@@ -37,5 +37,13 @@
   # networking.interfaces.wlp194s0.useDHCP = lib.mkDefault true;
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
-  hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
+  hardware.cpu.amd.updateMicrocode =
+    lib.mkDefault config.hardware.enableRedistributableFirmware;
+  hardware.bluetooth.settings = {
+    General = {
+      # Conservative: some controllers behave better with privacy off
+      Privacy = "device";
+    };
+  };
+
 }

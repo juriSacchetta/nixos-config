@@ -21,7 +21,7 @@
 
       # Performance: Use all available cores for building
       max-jobs = "auto";
-      cores = 0;  # 0 = use all available cores
+      cores = 0; # 0 = use all available cores
 
       # Safer public default: only root is trusted for privileged Nix operations.
       trusted-users = [ "root" ];
@@ -37,14 +37,23 @@
     # TEMPORARY: Use 6.17.x until 6.18.x/6.19.x amdgpu bugs are fixed
     # See: https://community.frame.work/t/attn-critical-bugs-in-amdgpu-driver-included-with-kernel-6-18-x-6-19-x/79221
     # kernelPackages = pkgs.linuxPackages_6_17;  # Uncomment to use stable 6.17.x
-    kernelPackages = pkgs.linuxPackages_latest;   # Currently 6.18.x with workarounds
+    kernelPackages =
+      pkgs.linuxPackages_latest; # Currently 6.18.x with workarounds
+
+    kernelParams = [
+      # USB: mitigate xHCI refusing D0->D3hot / flaky suspend behavior
+      "usbcore.autosuspend=-1"
+      # Bluetooth: reduce common controller quirks/noise on some chipsets
+      "btusb.enable_autosuspend=n"
+    ];
 
     loader = {
       systemd-boot = {
         enable = true;
-        configurationLimit = 10;  # Keep only last 10 generations (prevents /boot from filling)
+        configurationLimit =
+          10; # Keep only last 10 generations (prevents /boot from filling)
       };
-      timeout = 3;  # Boot menu timeout in seconds (default is 5)
+      timeout = 3; # Boot menu timeout in seconds (default is 5)
       efi.canTouchEfiVariables = true;
     };
 
@@ -54,10 +63,10 @@
       "net.core.default_qdisc" = "cake";
 
       # Virtual memory optimization
-      "vm.swappiness" = 10;  # Prefer RAM over swap
+      "vm.swappiness" = 10; # Prefer RAM over swap
 
       # File system performance
-      "fs.inotify.max_user_watches" = 524288;  # For development tools
+      "fs.inotify.max_user_watches" = 524288; # For development tools
     };
   };
 
@@ -74,6 +83,7 @@
       enable = true;
       package = pkgs-unstable.netbird;
     };
+
   };
 
   virtualisation.docker.enable = true;
@@ -82,8 +92,8 @@
   # Zram: Compressed RAM-based swap (better than disk swap)
   zramSwap = {
     enable = true;
-    algorithm = "zstd";  # Fast compression
-    memoryPercent = 50;  # Use up to 50% of RAM for compressed swap
+    algorithm = "zstd"; # Fast compression
+    memoryPercent = 50; # Use up to 50% of RAM for compressed swap
   };
 
   # --- 3. Locale ---
@@ -116,13 +126,13 @@
   # System-level packages (essential system tools only)
   # User packages should go in home.nix for better isolation
   environment.systemPackages = with pkgs; [
-    vim        # Essential editor for system recovery
-    git        # Required for flake operations
-    htop       # System monitoring (needed for multi-user systems)
+    vim # Essential editor for system recovery
+    git # Required for flake operations
+    htop # System monitoring (needed for multi-user systems)
 
     # Hardware inspection tools (useful for sysadmin/security work)
-    pciutils   # lspci - PCI device inspection
-    usbutils   # lsusb - USB device inspection
+    pciutils # lspci - PCI device inspection
+    usbutils # lsusb - USB device inspection
 
     # Network tools
     netcat-gnu
@@ -139,8 +149,8 @@
 
   # Documentation
   documentation = {
-    man.generateCaches = true;  # Faster man page searches
-    dev.enable = true;          # Development documentation
+    man.generateCaches = true; # Faster man page searches
+    dev.enable = true; # Development documentation
   };
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.

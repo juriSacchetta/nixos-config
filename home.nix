@@ -23,18 +23,23 @@
           export GITHUB_TOKEN="$TOKEN"
           export AIDER_GITHUB_COPILOT_API_KEY="$TOKEN"
 
-          # --- CONFIGURAZIONE MODELLI (Basata sulla doc ufficiale) ---
+          # --- MODEL DEFAULTS (balanced power/cost) ---
+          # Default: cheaper + still strong for most coding tasks
+          AIDER_MODEL="github_copilot/claude-3.5-sonnet"
+          AIDER_EDITOR_MODEL="github_copilot/claude-3.5-sonnet"
 
-          # Modello principale (Architect)
-          AIDER_MODEL="github_copilot/gpt-5.2"
-
-          # Modello che esegue le modifiche
-          AIDER_EDITOR_MODEL="github_copilot/claude-sonnet-4.5"
+          # Opt-in "max power" when needed:
+          #   AIDER_POWER=1 aider-pro ...
+          if [ "''${AIDER_POWER:-0}" = "1" ]; then
+            AIDER_MODEL="github_copilot/gpt-5.2"
+            AIDER_EDITOR_MODEL="github_copilot/claude-sonnet-4.5"
+            echo "Mode: GitHub Copilot Business (MAX POWER)"
+          else
+            echo "Mode: GitHub Copilot Business (Balanced)"
+          fi
 
           # --- CONFIGURAZIONE EDITOR DI TESTO (Opzionale) ---
           AIDER_EDITOR="nvim"
-
-          echo "Mode: GitHub Copilot Business"
 
           ${pkgs-unstable.aider-chat}/bin/aider \
             --architect \
@@ -149,9 +154,16 @@
     stream: true
 
     # --- Intelligenza sulla Repo ---
-    # 1024 è il default, ma con Claude Sonnet (che ha una finestra enorme) 
-    # possiamo alzare a 2048 o 4096 per dare ad Aider una visione più ampia del progetto.
-    map-tokens: 2048
+    # Reduced from 2048 to balance cost vs context (still good for most projects)
+    map-tokens: 1024
+
+    # --- Cost Controls ---
+    # Explicitly disable features that increase token usage
+    auto-commits: false
+    attribute-author: false
+    attribute-committer: false
+    attribute-commit-message-author: false
+    attribute-commit-message-committer: false
 
     check-update: false
 
