@@ -7,6 +7,7 @@
     defaultSopsFile = ./secrets/secrets.yaml;
 
     secrets.github_token = { };
+    secrets.gitlab_token = { };
   };
   home = {
     username = "js";
@@ -22,16 +23,23 @@
           export GITHUB_TOKEN="$TOKEN"
           export AIDER_GITHUB_COPILOT_API_KEY="$TOKEN"
 
-          # Modelli
-          ARCHITECT="github_copilot/gpt-5.2"
-          EDITOR="github_copilot/claude-sonnet-4.5"
+          # --- CONFIGURAZIONE MODELLI (Basata sulla doc ufficiale) ---
+
+          # Modello principale (Architect)
+          AIDER_MODEL="github_copilot/gpt-5.2"
+
+          # Modello che esegue le modifiche
+          AIDER_EDITOR_MODEL="github_copilot/claude-sonnet-4.5"
+
+          # --- CONFIGURAZIONE EDITOR DI TESTO (Opzionale) ---
+          AIDER_EDITOR="nvim"
 
           echo "Mode: GitHub Copilot Business"
 
           ${pkgs-unstable.aider-chat}/bin/aider \
             --architect \
-            --model "$ARCHITECT" \
-            --editor-model "$EDITOR" \
+            --model "$AIDER_MODEL" \
+            --editor-model "$AIDER_EDITOR_MODEL" \
             --model-settings-file ~/.aider.model.settings.yml \
             --cache-prompts \
             --no-auto-commits \
@@ -63,6 +71,7 @@
         eza # Per gli alias ls, ll, lt
         bat # Per le funzioni di preview
 
+        sops
         # Dev
         gcc
         gnumake
@@ -72,9 +81,7 @@
 
         tree
         # App
-        firefox
         neofetch
-        spotify
         inputs.zen-browser.packages."${pkgs.system}".default
 
         # --- FONT ---
@@ -107,7 +114,6 @@
         rust-analyzer
 
         zed
-        chromium
 
         man-pages
         man-pages-posix
@@ -235,6 +241,9 @@
         ll = "eza -al --icons";
         lt = "eza -a --tree --level=1 --icons";
         cd = "z";
+        spotify = "flatpak run com.spotify.Client";
+        firefox = "flatpak run org.mozilla.firefox";
+        chromium = "flatpak run org.chromium.Chromium";
       };
 
       history = {
@@ -251,6 +260,11 @@
       initExtra = ''
         source ${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme
         [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+
+        # Export GitLab Token for glab and gitlab.nvim
+        if [ -f "${config.sops.secrets.gitlab_token.path}" ]; then
+          export GITLAB_TOKEN="$(cat ${config.sops.secrets.gitlab_token.path})"
+        fi
       '';
     };
 
