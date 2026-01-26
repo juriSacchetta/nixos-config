@@ -25,8 +25,8 @@
 
           # --- MODEL DEFAULTS (balanced power/cost) ---
           # Default: cheaper + still strong for most coding tasks
-          AIDER_MODEL="github_copilot/claude-3.5-sonnet"
-          AIDER_EDITOR_MODEL="github_copilot/claude-3.5-sonnet"
+          AIDER_MODEL="github_copilot/claude-sonnet-4.5"
+          AIDER_EDITOR_MODEL="github_copilot/claude-haiku-4.5"
 
           # Opt-in "max power" when needed:
           #   AIDER_POWER=1 aider-pro ...
@@ -169,21 +169,30 @@
 
   '';
   home.file.".aider.model.settings.yml".text = ''
-    - name: github_copilot/gpt-5.2
+    # Apply these headers to ALL models automatically
+    - name: aider/extra_params
       extra_params:
         extra_headers:
           Editor-Version: "vscode/1.96.2"
           Editor-Plugin-Version: "copilot/1.256.0"
-          Copilot-Integration-Id: "vscode-chat"
           User-Agent: "GithubCopilot/1.256.0"
+          Copilot-Integration-Id: "vscode-chat"
+    # - name: github_copilot/gpt-5.2
+    #   extra_params:
+    #     extra_headers:
+    #       Editor-Version: "vscode/1.96.2"
+    #       Editor-Plugin-Version: "copilot/1.256.0"
+    #       Copilot-Integration-Id: "vscode-chat"
+    #       User-Agent: "GithubCopilot/1.256.0"
+    #
+    # - name: github_copilot/claude-sonnet-4.5
+    #   extra_params:
+    #     extra_headers:
+    #       Editor-Version: "vscode/1.96.2"
+    #       Editor-Plugin-Version: "copilot/1.256.0"
+    #       Copilot-Integration-Id: "vscode-chat"
+    #       User-Agent: "GithubCopilot/1.256.0"
 
-    - name: github_copilot/claude-sonnet-4.5
-      extra_params:
-        extra_headers:
-          Editor-Version: "vscode/1.96.2"
-          Editor-Plugin-Version: "copilot/1.256.0"
-          Copilot-Integration-Id: "vscode-chat"
-          User-Agent: "GithubCopilot/1.256.0"
   '';
   programs = {
     ssh = {
