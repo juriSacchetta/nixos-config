@@ -28,32 +28,40 @@
           AIDER_MODEL="github_copilot/claude-sonnet-4.5"
           AIDER_EDITOR_MODEL="github_copilot/claude-haiku-4.5"
 
+          # Build optional flags
+          EXTRA_FLAGS=""
+
           # Opt-in "max power" when needed:
           #   AIDER_POWER=1 aider-pro ...
           if [ "''${AIDER_POWER:-0}" = "1" ]; then
             AIDER_MODEL="github_copilot/gpt-5.2"
-            AIDER_EDITOR_MODEL="github_copilot/claude-sonnet-4.5"
+            AIDER_EDITOR_MODEL="github_copilot/claude-haiku-4.5"
             echo "Mode: GitHub Copilot Business (MAX POWER)"
           else
             echo "Mode: GitHub Copilot Business (Balanced)"
           fi
 
+          # Opt-in architect mode (expensive, two-stage planning):
+          #   AIDER_ARCHITECT=1 aider-pro ...
+          if [ "''${AIDER_ARCHITECT:-0}" = "1" ]; then
+            EXTRA_FLAGS="$EXTRA_FLAGS --architect --map-refresh manual"
+            echo "  + Architect mode enabled (expensive, manual map refresh)"
+          fi
+
+          # Opt-in watch-files mode (continuous monitoring):
+          #   aider-pro --watch-files ...
+          # Note: --watch-files is passed through "$@" if user specifies it
+
           # --- CONFIGURAZIONE EDITOR DI TESTO (Opzionale) ---
           AIDER_EDITOR="nvim"
 
           ${pkgs-unstable.aider-chat}/bin/aider \
-            --architect \
             --model "$AIDER_MODEL" \
             --editor-model "$AIDER_EDITOR_MODEL" \
             --model-settings-file ~/.aider.model.settings.yml \
             --cache-prompts \
-            --no-auto-commits \
-            --watch-files \
-            --no-show-model-warnings \
-            --no-attribute-author \
-            --no-attribute-committer \
-            --no-attribute-commit-message-author \
-            --no-attribute-commit-message-committer \
+            --auto-lint \
+            $EXTRA_FLAGS \
             "$@"
         '';
       in [
@@ -153,9 +161,9 @@
     pretty: true
     stream: true
 
-    # --- Intelligenza sulla Repo ---
-    # Reduced from 2048 to balance cost vs context (still good for most projects)
-    map-tokens: 1024
+    # Reduced to 768 for better cost/benefit ratio (~25% savings vs 1024)
+    # Sufficient for most projects while keeping context quality high
+    map-tokens: 768
 
     # --- Cost Controls ---
     # Explicitly disable features that increase token usage
@@ -166,6 +174,20 @@
     attribute-commit-message-committer: false
 
     check-update: false
+    show-model-warnings: false
+
+    # --- Quality & Caching ---
+    # Maximize cache hits - no keepalive pings waste tokens
+    cache-keepalive-pings: 0
+
+    # Only refresh map when explicitly needed (--map-refresh flag)
+    # Default behavior refreshes on every file change = wasted tokens
+    map-refresh: auto
+
+    # Free quality improvements - run local checks before consuming tokens
+    # Manual control to avoid surprise costs in scripts
+    lint-cmd: "nix flake check 2>&1 || true"
+    auto-lint: false
 
   '';
   home.file.".aider.model.settings.yml".text = ''
@@ -177,22 +199,6 @@
           Editor-Plugin-Version: "copilot/1.256.0"
           User-Agent: "GithubCopilot/1.256.0"
           Copilot-Integration-Id: "vscode-chat"
-    # - name: github_copilot/gpt-5.2
-    #   extra_params:
-    #     extra_headers:
-    #       Editor-Version: "vscode/1.96.2"
-    #       Editor-Plugin-Version: "copilot/1.256.0"
-    #       Copilot-Integration-Id: "vscode-chat"
-    #       User-Agent: "GithubCopilot/1.256.0"
-    #
-    # - name: github_copilot/claude-sonnet-4.5
-    #   extra_params:
-    #     extra_headers:
-    #       Editor-Version: "vscode/1.96.2"
-    #       Editor-Plugin-Version: "copilot/1.256.0"
-    #       Copilot-Integration-Id: "vscode-chat"
-    #       User-Agent: "GithubCopilot/1.256.0"
-
   '';
   programs = {
     ssh = {
@@ -265,6 +271,14 @@
         spotify = "flatpak run com.spotify.Client";
         firefox = "flatpak run org.mozilla.firefox";
         chromium = "flatpak run org.chromium.Chromium";
+
+        # Aider workflow aliases
+        ai = "aider-pro"; # Quick access, balanced mode
+        aip = "AIDER_POWER=1 aider-pro"; # Power mode (GPT-5.2)
+        aia = "AIDER_ARCHITECT=1 aider-pro"; # Architect mode only
+        aipa =
+          "AIDER_POWER=1 AIDER_ARCHITECT=1 aider-pro"; # Maximum power + architect
+        aiw = "aider-pro --watch-files"; # Watch mode for live file monitoring
       };
 
       history = {
