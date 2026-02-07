@@ -7,6 +7,7 @@
     "iommu=pt"                  # IOMMU passthrough for better performance
 
     # --- GPU Core Fixes (CRITICAL for 6.18.x on Strix Point) ---
+    "amdgpu.mes=0"              # Disable MES (mitigates "MES ring buffer is full" hangs/log spam)
     "amdgpu.gpu_recovery=1"     # Enable GPU recovery from hangs
     "amdgpu.cwsr_enable=0"      # Disable broken CWSR (see: https://bugs.gentoo.org/967078)
     "amdgpu.ip_block_mask=0xfffff7ff"  # Disable VPE (bit 11) - fixes VPE queue reset failures
