@@ -102,6 +102,7 @@
         # App
         neofetch
         inputs.zen-browser.packages."${pkgs.system}".default
+        discord # Installato a livello utente (non Flatpak)
 
         # --- FONT ---
         # Font di base per una buona copertura Unicode/Emoji
@@ -123,14 +124,13 @@
         statix
         nil
         nixfmt-classic
-        birdtray
+        mailspring
 
-        # ✅ RUST Toolchain Completa
+        # ✅ RUST Toolchain (Binary for faster builds)
+        # TODO: rust-bin richiede rust-overlay input nel flake
+        # rust-bin.stable.latest.default
         rustc
         cargo
-        rustfmt
-        clippy
-        rust-analyzer
 
         zed
 
@@ -321,7 +321,7 @@
       };
 
       # Powerlevel10k theme (loaded after oh-my-zsh)
-      initExtra = ''
+      initContent = ''
         source ${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme
         [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
@@ -360,6 +360,11 @@
   # --- 3. SERVIZI ---
   services.ssh-agent.enable = true;
   services.network-manager-applet.enable = true;
+
+  services.gnome-keyring = {
+    enable = true;
+    components = [ "pkcs11" "secrets" "ssh" ];
+  };
 
   services.nextcloud-client = {
     enable = true;
