@@ -64,6 +64,11 @@
             $EXTRA_FLAGS \
             "$@"
         '';
+
+        # nixenv - Ephemeral Nix shell environment manager
+        nixenv = pkgs.writeShellScriptBin "nixenv"
+          (builtins.readFile ./scripts/nixenv);
+
       in [
         # Core
         tmux
@@ -85,6 +90,7 @@
         bat # Per le funzioni di preview
 
         sops
+        nix-direnv
         # Dev
         gcc
         gnumake
@@ -132,6 +138,7 @@
         man-pages-posix
 
         aider-pro
+        nixenv # Ephemeral Nix shell environment manager
         ctags # Utile per la repo map di Aider
 
         pkgs-unstable.aider-chat
@@ -154,6 +161,16 @@
       fi
     '';
   };
+
+  # nixenv environment templates
+  home.file.".config/nixenv/envs/pwn.nix".source =
+    ./scripts/nixenv-templates/pwn.nix;
+  home.file.".config/nixenv/envs/web.nix".source =
+    ./scripts/nixenv-templates/web.nix;
+  home.file.".config/nixenv/envs/rev.nix".source =
+    ./scripts/nixenv-templates/rev.nix;
+  home.file.".config/nixenv/envs/crypto.nix".source =
+    ./scripts/nixenv-templates/crypto.nix;
 
   home.file.".tmux.conf" = {
     source = "${inputs.oh-my-tmux}/.tmux.conf";
