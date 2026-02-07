@@ -135,12 +135,24 @@
         ctags # Utile per la repo map di Aider
 
         pkgs-unstable.aider-chat
+
+        # OpenCode - VSCode alternative
+        opencode
       ];
     sessionVariables = {
       # Forza le app Electron a usare Wayland nativo (risparmio CPU/Batteria)
       NIXOS_OZONE_WL = "1";
       MOZ_ENABLE_WAYLAND = "1";
     };
+
+    # Session variables that need to read from sops secrets
+    # Note: These are loaded at shell initialization, not at build time
+    sessionVariablesExtra = ''
+      # Expose GitHub token for OpenCode MCP servers (same token used by Aider)
+      if [ -f "${config.sops.secrets.github_token.path}" ]; then
+        export GITHUB_TOKEN="$(cat ${config.sops.secrets.github_token.path})"
+      fi
+    '';
   };
 
   home.file.".tmux.conf" = {

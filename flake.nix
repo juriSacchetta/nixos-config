@@ -24,10 +24,11 @@
     nix-flatpak.url = "github:gmodena/nix-flatpak";
     sops-nix.url = "github:Mic92/sops-nix";
     sops-nix.inputs.nixpkgs.follows = "nixpkgs";
+    opencode.url = "github:GutMutCode/opencode-nix";
   };
 
   outputs = { self, nixpkgs, nixpkgs-unstable, home-manager, solaar, sops-nix
-    , ... }@inputs: {
+    , opencode, ... }@inputs: {
       nixosConfigurations = {
         nixos = let
           system = "x86_64-linux";
@@ -47,6 +48,11 @@
             ./configuration.nix
 
             solaar.nixosModules.default
+
+            # Add opencode overlay
+            {
+              nixpkgs.overlays = [ opencode.overlays.default ];
+            }
 
             # Modulo Home Manager
             home-manager.nixosModules.home-manager
