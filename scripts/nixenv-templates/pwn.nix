@@ -19,14 +19,22 @@ pkgs.mkShell {
     strace
     checksec
 
+    # SMT solver
+    z3
+
     # Optional: Uncomment as needed
     # radare2
     # ghidra
     # patchelf
     # ropper
+
+    # Python package manager
+    uv
   ];
 
   shellHook = ''
+    # Add tenrec to PATH
+    export PATH="/home/js/.local/share/tenrec-venv/bin:$PATH"
     echo "================================================"
     echo "  PWN Environment - Binary Exploitation"
     echo "================================================"
