@@ -231,22 +231,6 @@
           Copilot-Integration-Id: "vscode-chat"
   '';
 
-  # GitLab CLI (glab) configuration
-  home.file.".config/glab-cli/config.yml".text = ''
-    # GitLab CLI configuration for self-hosted instance
-    hosts:
-      gitserver.genomsys.com:
-        api_protocol: https
-        git_protocol: ssh
-        user: jsacchetta
-    git_protocol: ssh
-    editor: nvim
-    prompt: enabled
-    pager: less
-    http_unix_socket:
-    browser:
-  '';
-
   programs = {
     ssh = {
       enable = true;
