@@ -79,6 +79,7 @@
         ripgrep
         fd
         wl-clipboard
+        jq
 
         # System monitoring
         btop # Modern system monitor (better than htop)
